@@ -139,12 +139,60 @@ $matieres = listMatieres();
   h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-weight:600;margin:0;}
   a{color:inherit;text-decoration:none;}
 
-  header.site{padding:56px 24px 40px;max-width:960px;margin:0 auto;border-bottom:1px solid var(--line);}
+  /* ---------- Barre de navigation ---------- */
+  nav.topbar{
+    position:sticky; top:0; z-index:10;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+  }
+  nav.topbar .bar{
+    max-width:960px;margin:0 auto;padding:18px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;
+  }
+  nav.topbar .brand{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    font-size:1.15rem;
+  }
+  nav.topbar .links{display:flex;gap:26px;}
+  nav.topbar .links a{font-size:0.92rem;color:#4b4536;}
+  nav.topbar .links a:hover{color:var(--accent);}
+
+  header.site{padding:48px 24px 40px;max-width:960px;margin:0 auto;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+  header.site .avatar{
+    flex:0 0 auto;
+    width:112px;height:112px;
+    border-radius:50%;
+    object-fit:cover;
+    border:1px solid var(--line);
+  }
+  header.site .intro{flex:1 1 260px;min-width:0;}
   header.site .kicker{font-size:0.85rem;color:var(--accent-2);margin-bottom:10px;}
   header.site h1{font-size:2.6rem;letter-spacing:-0.01em;}
   header.site p{max-width:52ch;color:#4b4536;margin-top:12px;}
 
   main{max-width:960px;margin:0 auto;padding:40px 24px 80px;}
+
+  .section-block{padding-top:52px;}
+  .section-block:first-child{padding-top:0;}
+  .section-block h2{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    font-size:1.7rem;margin-bottom:20px;
+  }
+
+  /* ---------- Projets ---------- */
+  .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
+  .project-card{background:var(--paper-alt);border:1px solid var(--line);padding:22px 20px;}
+  .project-card h3{font-size:1.05rem;margin:0 0 8px;font-weight:600;}
+  .project-card p{margin:0;color:#4b4536;font-size:0.9rem;}
+
+  /* ---------- Contact ---------- */
+  .contact-list{list-style:none;margin:0;padding:0;}
+  .contact-list li{padding:10px 0;border-top:1px solid var(--line);display:flex;gap:10px;font-size:0.95rem;}
+  .contact-list li:last-child{border-bottom:1px solid var(--line);}
+  .contact-list .label{color:#8a8272;min-width:90px;}
+  .contact-list a{border-bottom:1px solid var(--accent-2);color:var(--accent-2);}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
   .card{position:relative;display:block;background:var(--paper-alt);border:1px solid var(--line);padding:22px 20px 20px;min-height:130px;}
@@ -174,7 +222,10 @@ $matieres = listMatieres();
   footer{max-width:960px;margin:0 auto;padding:24px;color:#9a927e;font-size:0.8rem;text-align:center;}
 
   @media (max-width:480px){
-    header.site{padding:40px 18px 28px;}
+    nav.topbar .bar{padding:14px 18px;}
+    nav.topbar .links{gap:16px;}
+    header.site{padding:32px 18px 24px;gap:20px;}
+    header.site .avatar{width:84px;height:84px;}
     header.site h1{font-size:2rem;}
     main{padding:28px 18px 60px;}
   }
@@ -182,13 +233,36 @@ $matieres = listMatieres();
 </head>
 <body>
 
-<header class="site">
-  <div class="kicker">Portfolio scolaire</div>
-  <h1><?= $currentDir !== null ? 'Exercices' : 'Mes matières' ?></h1>
-  <?php if ($currentDir === null): ?>
+<nav class="topbar">
+  <div class="bar">
+    <div class="brand">Mohamed Tarchouli</div>
+    <div class="links">
+      <a href="index.php#accueil">Accueil</a>
+      <a href="index.php#projets">Projets</a>
+      <a href="index.php#modules">Modules</a>
+      <a href="index.php#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<?php if ($currentDir === null): ?>
+<header class="site" id="accueil">
+  <!-- LIGNE À MODIFIER : remplacez ce src par le lien (ou chemin) de votre vraie photo -->
+  <img class="avatar" src="public\images\1782739568114.png" alt="Photo de Mohamed Tarchouli">
+  <div class="intro">
+    <div class="kicker">Portfolio scolaire</div>
+    <h1>Mes matières</h1>
     <p>Retrouvez ici toutes les matières et leurs exercices, classés par module. Cliquez sur une matière pour voir les fichiers disponibles.</p>
-  <?php endif; ?>
+  </div>
 </header>
+<?php else: ?>
+<header class="site">
+  <div class="intro">
+    <div class="kicker">Portfolio scolaire</div>
+    <h1>Exercices</h1>
+  </div>
+</header>
+<?php endif; ?>
 
 <main>
 <?php if ($currentDir !== null): ?>
@@ -224,19 +298,45 @@ $matieres = listMatieres();
 
 <?php else: ?>
 
-  <?php if (empty($matieres)): ?>
-    <p class="empty">Aucune matière n'a encore été ajoutée. Ajoutez un dossier dans public/docs/ puis faites un push.</p>
-  <?php else: ?>
-    <div class="grid">
-      <?php foreach ($matieres as $m): ?>
-        <a class="card" href="index.php?matiere=<?= urlencode($m['code']) ?>">
-          <div class="code"><?= htmlspecialchars($m['code']) ?></div>
-          <div class="name"><?= htmlspecialchars($meta[$m['code']] ?? '') ?></div>
-          <div class="count"><?= $m['count'] ?> fichier<?= $m['count'] > 1 ? 's' : '' ?></div>
-        </a>
-      <?php endforeach; ?>
+  <section class="section-block" id="projets">
+    <h2>Projets</h2>
+    <div class="projects-grid">
+      <div class="project-card">
+        <h3>Nom du projet</h3>
+        <p>Courte description du projet — technologies utilisées et rôle joué.</p>
+      </div>
+      <div class="project-card">
+        <h3>Nom du projet</h3>
+        <p>Courte description du projet — technologies utilisées et rôle joué.</p>
+      </div>
     </div>
-  <?php endif; ?>
+  </section>
+
+  <section class="section-block" id="modules">
+    <h2>Modules</h2>
+    <?php if (empty($matieres)): ?>
+      <p class="empty">Aucune matière n'a encore été ajoutée. Ajoutez un dossier dans public/docs/ puis faites un push.</p>
+    <?php else: ?>
+      <div class="grid">
+        <?php foreach ($matieres as $m): ?>
+          <a class="card" href="index.php?matiere=<?= urlencode($m['code']) ?>">
+            <div class="code"><?= htmlspecialchars($m['code']) ?></div>
+            <div class="name"><?= htmlspecialchars($meta[$m['code']] ?? '') ?></div>
+            <div class="count"><?= $m['count'] ?> fichier<?= $m['count'] > 1 ? 's' : '' ?></div>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+  </section>
+
+  <section class="section-block" id="contact">
+    <h2>Contact</h2>
+    <ul class="contact-list">
+      <li><span class="label">Email</span><a href="mailto:votre.email@exemple.com">votre.email@exemple.com</a></li>
+      <li><span class="label">GitHub</span><a href="https://github.com/votre-profil" target="_blank" rel="noopener">github.com/votre-profil</a></li>
+      <li><span class="label">LinkedIn</span><a href="https://linkedin.com/in/votre-profil" target="_blank" rel="noopener">linkedin.com/in/votre-profil</a></li>
+    </ul>
+  </section>
 
 <?php endif; ?>
 </main>
