@@ -248,7 +248,7 @@ $matieres = listMatieres();
 <?php if ($currentDir === null): ?>
 <header class="site" id="accueil">
   <!-- LIGNE À MODIFIER : remplacez ce src par le lien (ou chemin) de votre vraie photo -->
-  <img class="avatar" src="../public/images/profile.png" alt="Photo de Mohamed Tarchouli">
+  <img class="avatar" src="..\public\images\profile.png" alt="Photo de Mohamed Tarchouli">
   <div class="intro">
     <div class="kicker">Portfolio scolaire</div>
     <h1>Mes matières</h1>
@@ -332,7 +332,7 @@ $matieres = listMatieres();
   <section class="section-block" id="contact">
     <h2>Contact</h2>
     <ul class="contact-list">
-      <li><span class="label">Email</span><a href="mailto:mohamed.tarchouli.contact@gmail.com">votre.email@exemple.com</a></li>
+      <li><span class="label">Email</span><a href="mailto:mohamed.tarchouli.contact@gmail.com">mohamed.tarchouli.contact@gmail.com</a></li>
       <li><span class="label">GitHub</span><a href="https://github.com/mohamed-workspace" target="_blank" rel="noopener">mohamed-workspace</a></li>
       <li><span class="label">LinkedIn</span><a href="https://linkedin.com/in/mohamed-tarchouli-691583403?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener">MOHAMED TARCHOULI</a></li>
     </ul>
