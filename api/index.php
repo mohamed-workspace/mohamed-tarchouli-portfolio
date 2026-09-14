@@ -1,22 +1,22 @@
 <?php
 /**
- * Portfolio des matières — page unique (HTML/CSS/JS/PHP)
- * ---------------------------------------------------------
- * - Liste les matières = les sous-dossiers de /docs
- * - Cliquer sur une matière -> liste des fichiers dans /docs/<matiere>
- * - Bouton "Télécharger" pour chaque fichier
- * - Les noms complets des matières (optionnels) viennent de docs/meta.json
- *   (ce fichier est géré automatiquement par le dashboard.php)
+ * Portfolio des matières — affichage uniquement (lecture seule)
+ * ---------------------------------------------------------------
+ * Pas de dashboard, pas d'écriture sur le disque (compatible Vercel).
+ * Pour ajouter une matière ou un exercice : ajoutez le fichier
+ * directement dans public/docs/<matiere>/ puis faites git push.
+ *
+ * Structure attendue :
+ *   api/index.php   (ce fichier)
+ *   public/docs/M201/exercice1.pdf
+ *   public/docs/M203/...
+ *   public/docs/meta.json   (optionnel — noms complets des matières)
+ *
+ * ⚠️ Si votre structure de dossiers est différente, changez juste
+ * la ligne DOCS_DIR ci-dessous pour qu'elle pointe vers public/docs.
  */
 
-// ----------------------------------------------------------------
-// Config
-// ----------------------------------------------------------------
-define('DOCS_DIR', __DIR__ . '/docs');
-
-if (!is_dir(DOCS_DIR)) {
-    mkdir(DOCS_DIR, 0755, true);
-}
+define('DOCS_DIR', __DIR__ . '/../public/docs');
 
 // ----------------------------------------------------------------
 // Helpers
@@ -31,6 +31,7 @@ function loadMeta(): array {
 }
 
 function listMatieres(): array {
+    if (!is_dir(DOCS_DIR)) return [];
     $items = [];
     foreach (scandir(DOCS_DIR) as $entry) {
         if ($entry === '.' || $entry === '..') continue;
@@ -43,26 +44,21 @@ function listMatieres(): array {
             $items[] = ['code' => $entry, 'count' => $count];
         }
     }
-    sort_matieres($items);
-    return $items;
-}
-
-function sort_matieres(array &$items): void {
     usort($items, fn($a, $b) => strcmp($a['code'], $b['code']));
+    return $items;
 }
 
 /** Empêche toute tentative de sortir du dossier docs/ (path traversal) */
 function safeSegment(string $s): string {
-    $s = basename($s);
-    return $s;
+    return basename($s);
 }
 
 function matiereDir(string $code): ?string {
     $code = safeSegment($code);
-    $path = DOCS_DIR . '/' . $code;
-    $real = realpath($path);
     $realDocs = realpath(DOCS_DIR);
-    if ($real === false || $realDocs === false) return null;
+    if ($realDocs === false) return null;
+    $real = realpath($realDocs . '/' . $code);
+    if ($real === false) return null;
     if (strpos($real, $realDocs) !== 0) return null;
     if (!is_dir($real)) return null;
     return $real;
@@ -75,7 +71,7 @@ function humanSize(int $bytes): string {
 }
 
 // ----------------------------------------------------------------
-// Action: téléchargement d'un fichier
+// Action: téléchargement d'un fichier (lecture seule, pas d'écriture)
 // ----------------------------------------------------------------
 if (isset($_GET['action']) && $_GET['action'] === 'download') {
     $dir = matiereDir($_GET['matiere'] ?? '');
@@ -137,173 +133,45 @@ $matieres = listMatieres();
     --accent:#8B5E34;
     --accent-2:#4B6355;
     --line:#D8D3C7;
-    --danger:#A6432E;
   }
   *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    line-height:1.5;
-  }
-  h1,h2,h3{
-    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    font-weight:600;
-    margin:0;
-  }
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;}
+  h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-weight:600;margin:0;}
   a{color:inherit;text-decoration:none;}
 
-  header.site{
-    padding:56px 24px 40px;
-    max-width:960px;
-    margin:0 auto;
-    border-bottom:1px solid var(--line);
-  }
-  header.site .kicker{
-    font-size:0.85rem;
-    color:var(--accent-2);
-    margin-bottom:10px;
-  }
-  header.site h1{
-    font-size:2.6rem;
-    letter-spacing:-0.01em;
-  }
-  header.site p{
-    max-width:52ch;
-    color:#4b4536;
-    margin-top:12px;
-  }
+  header.site{padding:56px 24px 40px;max-width:960px;margin:0 auto;border-bottom:1px solid var(--line);}
+  header.site .kicker{font-size:0.85rem;color:var(--accent-2);margin-bottom:10px;}
+  header.site h1{font-size:2.6rem;letter-spacing:-0.01em;}
+  header.site p{max-width:52ch;color:#4b4536;margin-top:12px;}
 
-  main{
-    max-width:960px;
-    margin:0 auto;
-    padding:40px 24px 80px;
-  }
+  main{max-width:960px;margin:0 auto;padding:40px 24px 80px;}
 
-  /* ---------- Grille des matières (page d'accueil) ---------- */
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-    gap:18px;
-  }
-  .card{
-    position:relative;
-    display:block;
-    background:var(--paper-alt);
-    border:1px solid var(--line);
-    padding:22px 20px 20px;
-    min-height:130px;
-  }
-  .card::before{
-    content:"";
-    position:absolute;
-    top:0; left:20px;
-    width:38px; height:8px;
-    background:var(--accent);
-  }
-  .card .code{
-    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    font-size:1.6rem;
-    margin-top:14px;
-  }
-  .card .name{
-    color:#4b4536;
-    font-size:0.92rem;
-    margin-top:6px;
-  }
-  .card .count{
-    position:absolute;
-    bottom:16px; left:20px;
-    font-size:0.8rem;
-    color:var(--accent-2);
-  }
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
+  .card{position:relative;display:block;background:var(--paper-alt);border:1px solid var(--line);padding:22px 20px 20px;min-height:130px;}
+  .card::before{content:"";position:absolute;top:0;left:20px;width:38px;height:8px;background:var(--accent);}
+  .card .code{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:1.6rem;margin-top:14px;}
+  .card .name{color:#4b4536;font-size:0.92rem;margin-top:6px;}
+  .card .count{position:absolute;bottom:16px;left:20px;font-size:0.8rem;color:var(--accent-2);}
   .card:hover{border-color:var(--accent);}
 
-  .empty{
-    color:#6b6455;
-    padding:40px 0;
-  }
+  .empty{color:#6b6455;padding:40px 0;}
 
-  /* ---------- Vue détail d'une matière ---------- */
-  .back{
-    display:inline-block;
-    margin-bottom:24px;
-    font-size:0.9rem;
-    color:var(--accent-2);
-    border-bottom:1px solid var(--accent-2);
-  }
-  .subject-title{
-    display:flex;
-    align-items:baseline;
-    gap:14px;
-    flex-wrap:wrap;
-    margin-bottom:6px;
-  }
+  .back{display:inline-block;margin-bottom:24px;font-size:0.9rem;color:var(--accent-2);border-bottom:1px solid var(--accent-2);}
+  .subject-title{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
   .subject-title h1{font-size:2.2rem;}
-  .subject-title .full-name{
-    color:#6b6455;
-    font-size:1rem;
-  }
-  .subject-sub{
-    color:#6b6455;
-    margin-bottom:28px;
-    font-size:0.92rem;
-  }
+  .subject-title .full-name{color:#6b6455;font-size:1rem;}
+  .subject-sub{color:#6b6455;margin-bottom:28px;font-size:0.92rem;}
 
-  ul.exercices{
-    list-style:none;
-    margin:0; padding:0;
-    border-top:1px solid var(--line);
-  }
-  ul.exercices li{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-    padding:16px 4px;
-    border-bottom:1px solid var(--line);
-  }
-  .file-info{
-    display:flex;
-    align-items:baseline;
-    gap:12px;
-    min-width:0;
-  }
-  .file-info .ext{
-    flex:0 0 auto;
-    background:var(--ink);
-    color:var(--paper);
-    font-size:0.72rem;
-    padding:3px 7px;
-  }
-  .file-info .fname{
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-  }
-  .file-info .fsize{
-    flex:0 0 auto;
-    color:#8a8272;
-    font-size:0.85rem;
-  }
-  .dl-btn{
-    flex:0 0 auto;
-    border:1px solid var(--ink);
-    padding:8px 16px;
-    font-size:0.88rem;
-    white-space:nowrap;
-  }
+  ul.exercices{list-style:none;margin:0;padding:0;border-top:1px solid var(--line);}
+  ul.exercices li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);}
+  .file-info{display:flex;align-items:baseline;gap:12px;min-width:0;}
+  .file-info .ext{flex:0 0 auto;background:var(--ink);color:var(--paper);font-size:0.72rem;padding:3px 7px;}
+  .file-info .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .file-info .fsize{flex:0 0 auto;color:#8a8272;font-size:0.85rem;}
+  .dl-btn{flex:0 0 auto;border:1px solid var(--ink);padding:8px 16px;font-size:0.88rem;white-space:nowrap;}
   .dl-btn:hover{background:var(--ink);color:var(--paper);}
 
-  footer{
-    max-width:960px;
-    margin:0 auto;
-    padding:24px;
-    color:#9a927e;
-    font-size:0.8rem;
-    text-align:center;
-  }
+  footer{max-width:960px;margin:0 auto;padding:24px;color:#9a927e;font-size:0.8rem;text-align:center;}
 
   @media (max-width:480px){
     header.site{padding:40px 18px 28px;}
@@ -357,7 +225,7 @@ $matieres = listMatieres();
 <?php else: ?>
 
   <?php if (empty($matieres)): ?>
-    <p class="empty">Aucune matière n'a encore été ajoutée. Utilisez le tableau de bord pour en créer une.</p>
+    <p class="empty">Aucune matière n'a encore été ajoutée. Ajoutez un dossier dans public/docs/ puis faites un push.</p>
   <?php else: ?>
     <div class="grid">
       <?php foreach ($matieres as $m): ?>
@@ -373,6 +241,6 @@ $matieres = listMatieres();
 <?php endif; ?>
 </main>
 
-<footer>Portfolio scolaire — géré via le tableau de bord</footer>
+<footer>Portfolio scolaire</footer>
 </body>
 </html>
