@@ -248,7 +248,7 @@ $matieres = listMatieres();
 <?php if ($currentDir === null): ?>
 <header class="site" id="accueil">
   <!-- LIGNE À MODIFIER : remplacez ce src par le lien (ou chemin) de votre vraie photo -->
-  <img class="avatar" src="..\public\images\profile.png" alt="Photo de Mohamed Tarchouli">
+  <img class="avatar" src="/images/profile.png" alt="Photo de Mohamed Tarchouli">
   <div class="intro">
     <div class="kicker">Portfolio scolaire</div>
     <h1>Mes matières</h1>
