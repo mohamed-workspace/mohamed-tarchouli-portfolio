@@ -251,8 +251,8 @@ $matieres = listMatieres();
   <img class="avatar" src="/images/profile.png" alt="Photo de Mohamed Tarchouli">
   <div class="intro">
     <div class="kicker">Portfolio scolaire</div>
-    <h1>Mes matières</h1>
-    <p>Retrouvez ici toutes les matières et leurs exercices, classés par module. Cliquez sur une matière pour voir les fichiers disponibles.</p>
+    <h1>Les Modules</h1>
+    <p>Retrouvez ici toutes les Modules et leurs exercices. Cliquez sur une Modules pour voir les fichiers disponibles.</p>
   </div>
 </header>
 <?php else: ?>
@@ -267,7 +267,7 @@ $matieres = listMatieres();
 <main>
 <?php if ($currentDir !== null): ?>
 
-  <a class="back" href="index.php">← Toutes les matières</a>
+  <a class="back" href="index.php">← Toutes les Modules</a>
 
   <div class="subject-title">
     <h1><?= htmlspecialchars($currentCode) ?></h1>
@@ -278,7 +278,7 @@ $matieres = listMatieres();
   <div class="subject-sub"><?= count($exercices) ?> fichier<?= count($exercices) > 1 ? 's' : '' ?> disponible<?= count($exercices) > 1 ? 's' : '' ?></div>
 
   <?php if (empty($exercices)): ?>
-    <p class="empty">Aucun exercice n'a encore été ajouté pour cette matière.</p>
+    <p class="empty">Aucun exercice n'a encore été ajouté pour cette Module.</p>
   <?php else: ?>
     <ul class="exercices">
       <?php foreach ($exercices as $ex): ?>
