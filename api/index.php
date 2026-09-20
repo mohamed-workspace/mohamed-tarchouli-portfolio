@@ -6,10 +6,16 @@
  * Pour ajouter une matière ou un exercice : ajoutez le fichier
  * directement dans public/docs/<matiere>/ puis faites git push.
  *
+ * NOUVEAU : chaque matière peut contenir des sous-dossiers
+ * (ex: "uml", "figma"). Ils sont détectés automatiquement et
+ * affichés comme des sections séparées sur la page, avec le nom
+ * du sous-dossier en titre au-dessus de ses fichiers.
+ *
  * Structure attendue :
  *   api/index.php   (ce fichier)
  *   public/docs/M201/exercice1.pdf
- *   public/docs/M203/...
+ *   public/docs/M202/uml/diagram1.mdj
+ *   public/docs/M202/figma/maquette1.png
  *   public/docs/meta.json   (optionnel — noms complets des matières)
  *
  * ⚠️ Si votre structure de dossiers est différente, changez juste
@@ -17,6 +23,10 @@
  */
 
 define('DOCS_DIR', __DIR__ . '/../public/docs');
+
+// Ordre préféré d'affichage des sous-dossiers (les autres suivent,
+// classés alphabétiquement). Ajoutez-en d'autres ici si besoin.
+define('SUBFOLDER_ORDER', ['uml', 'figma']);
 
 // ----------------------------------------------------------------
 // Helpers
@@ -30,6 +40,21 @@ function loadMeta(): array {
     return [];
 }
 
+/** Compte récursivement tous les fichiers d'un dossier (tous niveaux). */
+function countFilesRecursive(string $dir): int {
+    $count = 0;
+    foreach (scandir($dir) as $entry) {
+        if ($entry === '.' || $entry === '..') continue;
+        $full = $dir . '/' . $entry;
+        if (is_dir($full)) {
+            $count += countFilesRecursive($full);
+        } elseif (is_file($full)) {
+            $count++;
+        }
+    }
+    return $count;
+}
+
 function listMatieres(): array {
     if (!is_dir(DOCS_DIR)) return [];
     $items = [];
@@ -37,11 +62,7 @@ function listMatieres(): array {
         if ($entry === '.' || $entry === '..') continue;
         $full = DOCS_DIR . '/' . $entry;
         if (is_dir($full)) {
-            $count = 0;
-            foreach (scandir($full) as $f) {
-                if ($f !== '.' && $f !== '..' && is_file($full . '/' . $f)) $count++;
-            }
-            $items[] = ['code' => $entry, 'count' => $count];
+            $items[] = ['code' => $entry, 'count' => countFilesRecursive($full)];
         }
     }
     usort($items, fn($a, $b) => strcmp($a['code'], $b['code']));
@@ -64,19 +85,80 @@ function matiereDir(string $code): ?string {
     return $real;
 }
 
+/** Résout un sous-dossier (ex: "uml") à l'intérieur d'une matière, en toute sécurité. */
+function subfolderDir(string $matiereRealDir, string $sub): ?string {
+    $sub = safeSegment($sub);
+    $real = realpath($matiereRealDir . '/' . $sub);
+    if ($real === false) return null;
+    if (strpos($real, $matiereRealDir) !== 0) return null;
+    if (!is_dir($real)) return null;
+    return $real;
+}
+
 function humanSize(int $bytes): string {
     if ($bytes < 1024) return $bytes . ' o';
     if ($bytes < 1024 * 1024) return round($bytes / 1024, 1) . ' Ko';
     return round($bytes / (1024 * 1024), 1) . ' Mo';
 }
 
+/** Liste les fichiers (pas les dossiers) directement dans $dir. */
+function filesIn(string $dir): array {
+    $files = [];
+    foreach (scandir($dir) as $f) {
+        if ($f === '.' || $f === '..') continue;
+        $full = $dir . '/' . $f;
+        if (is_file($full)) {
+            $files[] = [
+                'name' => $f,
+                'size' => humanSize(filesize($full)),
+                'ext'  => strtolower(pathinfo($f, PATHINFO_EXTENSION)) ?: 'fichier',
+            ];
+        }
+    }
+    usort($files, fn($a, $b) => strcmp($a['name'], $b['name']));
+    return $files;
+}
+
+/** Liste les noms des sous-dossiers directement dans $dir, dans l'ordre souhaité. */
+function subDirNames(string $dir): array {
+    $names = [];
+    foreach (scandir($dir) as $entry) {
+        if ($entry === '.' || $entry === '..') continue;
+        if (is_dir($dir . '/' . $entry)) $names[] = $entry;
+    }
+    $order = SUBFOLDER_ORDER;
+    usort($names, function ($a, $b) use ($order) {
+        $ia = array_search(strtolower($a), $order);
+        $ib = array_search(strtolower($b), $order);
+        if ($ia === false) $ia = 999;
+        if ($ib === false) $ib = 999;
+        if ($ia === $ib) return strcmp($a, $b);
+        return $ia <=> $ib;
+    });
+    return $names;
+}
+
 // ----------------------------------------------------------------
 // Action: téléchargement d'un fichier (lecture seule, pas d'écriture)
 // ----------------------------------------------------------------
 if (isset($_GET['action']) && $_GET['action'] === 'download') {
-    $dir = matiereDir($_GET['matiere'] ?? '');
+    $matiereDirReal = matiereDir($_GET['matiere'] ?? '');
+    if ($matiereDirReal === null) {
+        http_response_code(404);
+        exit('Fichier introuvable.');
+    }
+
+    $dir = $matiereDirReal;
+    if (!empty($_GET['dossier'])) {
+        $dir = subfolderDir($matiereDirReal, $_GET['dossier']);
+        if ($dir === null) {
+            http_response_code(404);
+            exit('Fichier introuvable.');
+        }
+    }
+
     $filename = safeSegment($_GET['file'] ?? '');
-    if ($dir === null || $filename === '') {
+    if ($filename === '') {
         http_response_code(404);
         exit('Fichier introuvable.');
     }
@@ -101,20 +183,22 @@ $meta = loadMeta();
 $currentCode = isset($_GET['matiere']) ? safeSegment($_GET['matiere']) : null;
 $currentDir = $currentCode ? matiereDir($currentCode) : null;
 
-$exercices = [];
+// $rootExercices  = fichiers directement dans le dossier de la matière
+// $subfolders     = [ ['name' => 'uml', 'files' => [...]], ['name' => 'figma', 'files' => [...]] ]
+$rootExercices = [];
+$subfolders = [];
+$totalCount = 0;
+
 if ($currentDir !== null) {
-    foreach (scandir($currentDir) as $f) {
-        if ($f === '.' || $f === '..') continue;
-        $full = $currentDir . '/' . $f;
-        if (is_file($full)) {
-            $exercices[] = [
-                'name' => $f,
-                'size' => humanSize(filesize($full)),
-                'ext'  => strtolower(pathinfo($f, PATHINFO_EXTENSION)) ?: 'fichier',
-            ];
-        }
+    $rootExercices = filesIn($currentDir);
+    $totalCount += count($rootExercices);
+
+    foreach (subDirNames($currentDir) as $subName) {
+        $subDirReal = $currentDir . '/' . $subName;
+        $subFiles = filesIn($subDirReal);
+        $subfolders[] = ['name' => $subName, 'files' => $subFiles];
+        $totalCount += count($subFiles);
     }
-    usort($exercices, fn($a, $b) => strcmp($a['name'], $b['name']));
 }
 
 $matieres = listMatieres();
@@ -210,6 +294,21 @@ $matieres = listMatieres();
   .subject-title .full-name{color:#6b6455;font-size:1rem;}
   .subject-sub{color:#6b6455;margin-bottom:28px;font-size:0.92rem;}
 
+  /* ---------- Sous-dossiers (UML, FIGMA, ...) ---------- */
+  .subfolder-block{margin-top:36px;}
+  .subfolder-block h3{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    font-size:1.3rem;
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    color:var(--ink);
+    margin:0 0 4px;
+    padding-bottom:10px;
+    border-bottom:2px solid var(--accent);
+    display:inline-block;
+  }
+  .subfolder-count{color:#8a8272;font-size:0.82rem;margin-bottom:4px;}
+
   ul.exercices{list-style:none;margin:0;padding:0;border-top:1px solid var(--line);}
   ul.exercices li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);}
   .file-info{display:flex;align-items:baseline;gap:12px;min-width:0;}
@@ -275,13 +374,15 @@ $matieres = listMatieres();
       <span class="full-name"><?= htmlspecialchars($meta[$currentCode]) ?></span>
     <?php endif; ?>
   </div>
-  <div class="subject-sub"><?= count($exercices) ?> fichier<?= count($exercices) > 1 ? 's' : '' ?> disponible<?= count($exercices) > 1 ? 's' : '' ?></div>
+  <div class="subject-sub"><?= $totalCount ?> fichier<?= $totalCount > 1 ? 's' : '' ?> disponible<?= $totalCount > 1 ? 's' : '' ?></div>
 
-  <?php if (empty($exercices)): ?>
+  <?php if ($totalCount === 0): ?>
     <p class="empty">Aucun exercice n'a encore été ajouté pour cette Module.</p>
-  <?php else: ?>
+  <?php endif; ?>
+
+  <?php if (!empty($rootExercices)): ?>
     <ul class="exercices">
-      <?php foreach ($exercices as $ex): ?>
+      <?php foreach ($rootExercices as $ex): ?>
         <li>
           <div class="file-info">
             <span class="ext"><?= htmlspecialchars($ex['ext']) ?></span>
@@ -295,6 +396,31 @@ $matieres = listMatieres();
       <?php endforeach; ?>
     </ul>
   <?php endif; ?>
+
+  <?php foreach ($subfolders as $sf): ?>
+    <div class="subfolder-block">
+      <h3><?= htmlspecialchars(strtoupper($sf['name'])) ?></h3>
+      <div class="subfolder-count"><?= count($sf['files']) ?> fichier<?= count($sf['files']) > 1 ? 's' : '' ?></div>
+      <?php if (empty($sf['files'])): ?>
+        <p class="empty">Aucun fichier dans ce dossier.</p>
+      <?php else: ?>
+        <ul class="exercices">
+          <?php foreach ($sf['files'] as $ex): ?>
+            <li>
+              <div class="file-info">
+                <span class="ext"><?= htmlspecialchars($ex['ext']) ?></span>
+                <span class="fname"><?= htmlspecialchars($ex['name']) ?></span>
+                <span class="fsize"><?= $ex['size'] ?></span>
+              </div>
+              <a class="dl-btn" href="index.php?action=download&matiere=<?= urlencode($currentCode) ?>&dossier=<?= urlencode($sf['name']) ?>&file=<?= urlencode($ex['name']) ?>">
+                Télécharger
+              </a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    </div>
+  <?php endforeach; ?>
 
 <?php else: ?>
 
