@@ -34,33 +34,32 @@ define('SUBFOLDER_ORDER', ['uml', 'figma']);
 
 // PROJETS : pour en ajouter un, copiez une ligne et changez les valeurs.
 // 'url' peut être un lien externe (https://...) ou une page de votre site.
-// 'url' vide = carte "bientôt" (non cliquable).
+// 'url' vide = carte "bientôt" (non cliquable, bordure en pointillés).
 $projects = [
     [
         'title' => 'Hours',
         'desc'  => "Page d'accueil e-commerce pour une marque de vêtements, réalisée en HTML et CSS pour un client freelance.",
         'url'   => 'https://levimohamed.github.io/frount-end',
-        'tags'  => ['HTML', 'CSS', 'Freelance'],
     ],
     [
         'title' => 'Ce portfolio',
         'desc'  => 'Un site PHP en lecture seule, déployé sur Vercel, qui regroupe mes modules et leurs exercices.',
         'url'   => 'index.php#modules',
-        'tags'  => ['PHP', 'Vercel'],
     ],
     [
-        'title' => 'Prochain projet',
-        'desc'  => 'Un nouveau projet sera ajouté ici.',
+        'title' => 'Facilo',
+        'desc'  => "Une plateforme de petites annonces, dans l'esprit d'Avito.",
         'url'   => '',
-        'tags'  => [],
     ],
 ];
 
 // COMPÉTENCES : groupes affichés dans la section "Compétences".
 $skills = [
-    ['title' => 'Front-end', 'icon' => 'monitor', 'items' => ['HTML', 'CSS', 'JavaScript', 'Figma']],
-    ['title' => 'Back-end',  'icon' => 'server',  'items' => ['PHP', 'Python', 'SQL', 'MySQL']],
-    ['title' => 'Outils',    'icon' => 'tool',    'items' => ['Git et GitHub', 'Vercel', 'UML', 'StarUML']],
+    ['title' => 'Front-end',              'icon' => 'monitor',   'items' => ['HTML', 'CSS', 'JavaScript', 'Bootstrap', 'Figma']],
+    ['title' => 'Back-end',               'icon' => 'server',    'items' => ['PHP', 'Python', 'SQL', 'MySQL']],
+    ['title' => 'Analyse et conception',  'icon' => 'layers',    'items' => ['Merise', 'UML']],
+    ['title' => 'Bureautique et design',  'icon' => 'file-text', 'items' => ['Excel', 'PowerPoint', 'Word', 'Canva']],
+    ['title' => 'Outils',                 'icon' => 'tool',      'items' => ['Git et GitHub', 'GitLab', 'Vercel', 'Jira', 'GanttProject', 'StarUML']],
 ];
 
 // MENU : [ancre, libellé, icône]
@@ -364,7 +363,8 @@ $pageTitle = $currentDir !== null
     display:flex;align-items:center;justify-content:center;
     font-family:var(--display);font-size:3.4rem;font-weight:700;color:var(--g4);
   }
-  .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);}
+  .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);transition:filter .5s ease;}
+  .avatar:hover img{filter:none;}
 
   .hero.mini .hero-inner{min-height:0;padding:64px 28px 56px;}
   .hero.mini h1{font-size:clamp(2.6rem,7vw,5rem);}
@@ -385,10 +385,10 @@ $pageTitle = $currentDir !== null
   /* À propos */
   .about{display:grid;grid-template-columns:1fr 1.4fr;gap:48px;align-items:start;}
   .about .text p{font-size:1.25rem;line-height:1.6;margin:0 0 18px;}
-  .about .text p:last-child{margin-bottom:0;color:var(--g3);}
+  .about .text p:last-child{margin-bottom:0;}
 
   /* Compétences */
-  .skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+  .skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
   .skill-group{border:1.5px solid var(--black);padding:28px;}
   .skill-group h3{display:flex;align-items:center;gap:12px;font-size:1.5rem;}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
@@ -397,13 +397,12 @@ $pageTitle = $currentDir !== null
   /* Projets (cartes-liens) */
   .projects{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
   .project{
-    display:flex;flex-direction:column;gap:12px;min-height:240px;padding:28px;
+    display:flex;flex-direction:column;gap:12px;min-height:200px;padding:28px;
     background:var(--white);border:1.5px solid var(--black);
     transition:background .25s,color .25s;
   }
   .project h3{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:1.7rem;}
   .project p{margin:0;color:var(--g3);transition:color .25s;}
-  .project .chips{margin-top:auto;}
   .project .go{width:1.3em;height:1.3em;transition:transform .25s;}
   .project:hover{background:var(--black);color:var(--white);}
   .project:hover p{color:var(--g4);}
@@ -517,6 +516,8 @@ $pageTitle = $currentDir !== null
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
   <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
   <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+  <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
   <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
 </svg>
 
@@ -559,8 +560,7 @@ $pageTitle = $currentDir !== null
     <div class="wrap about">
       <h2>À propos</h2>
       <div class="text">
-        <p>Je suis stagiaire en développement web full stack. Je dessine des interfaces simples et lisibles en front-end, et je construis la partie serveur avec PHP, Python et SQL.</p>
-        <p>En parallèle, je prends des missions freelance en front-end. Ce portfolio rassemble ce que je réalise, au travail comme en formation.</p>
+        <p>Je suis stagiaire en développement web full stack. Je dessine des interfaces simples et lisibles en front-end, et je construis la partie serveur avec PHP et SQL.</p>
       </div>
     </div>
   </section>
@@ -592,7 +592,6 @@ $pageTitle = $currentDir !== null
     <div class="wrap">
       <div class="section-head">
         <h2>Projets</h2>
-        <p>Cliquez sur un projet pour l'ouvrir.</p>
       </div>
       <div class="projects">
         <?php foreach ($projects as $p):
@@ -609,13 +608,6 @@ $pageTitle = $currentDir !== null
               <?php if ($isLink): ?><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?><?php endif; ?>
             </h3>
             <p><?= htmlspecialchars($p['desc']) ?></p>
-            <?php if (!empty($p['tags'])): ?>
-              <div class="chips">
-                <?php foreach ($p['tags'] as $t): ?>
-                  <span class="chip"><?= htmlspecialchars($t) ?></span>
-                <?php endforeach; ?>
-              </div>
-            <?php endif; ?>
           </<?= $tag ?>>
         <?php endforeach; ?>
       </div>
@@ -650,7 +642,7 @@ $pageTitle = $currentDir !== null
     <div class="wrap">
       <div class="section-head">
         <h2>Contact</h2>
-        <p>Un stage, une mission freelance ou une question ? Écrivez-moi.</p>
+        <p>Un stage, un emploi, une mission freelance ou une question ? Écrivez-moi.</p>
       </div>
       <ul class="contact-list">
         <li><a href="mailto:mohamed.tarchouli.contact@gmail.com"><?= ic('mail') ?><span class="label">Email</span><span class="value">mohamed.tarchouli.contact@gmail.com</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
