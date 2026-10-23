@@ -1,15 +1,14 @@
 <?php
 /**
- * Portfolio des matières — affichage uniquement (lecture seule)
+ * Portfolio — Mohamed Tarchouli (lecture seule)
  * ---------------------------------------------------------------
  * Pas de dashboard, pas d'écriture sur le disque (compatible Vercel).
  * Pour ajouter une matière ou un exercice : ajoutez le fichier
  * directement dans public/docs/<matiere>/ puis faites git push.
  *
- * NOUVEAU : chaque matière peut contenir des sous-dossiers
- * (ex: "uml", "figma"). Ils sont détectés automatiquement et
- * affichés comme des sections séparées sur la page, avec le nom
- * du sous-dossier en titre au-dessus de ses fichiers.
+ * Chaque matière peut contenir des sous-dossiers (ex: "uml", "figma").
+ * Ils sont détectés automatiquement et affichés comme des sections
+ * séparées, avec le nom du sous-dossier en titre.
  *
  * Structure attendue :
  *   api/index.php   (ce fichier)
@@ -17,6 +16,7 @@
  *   public/docs/M202/uml/diagram1.mdj
  *   public/docs/M202/figma/maquette1.png
  *   public/docs/meta.json   (optionnel — noms complets des matières)
+ *   public/images/profile.png
  *
  * ⚠️ Si votre structure de dossiers est différente, changez juste
  * la ligne DOCS_DIR ci-dessous pour qu'elle pointe vers public/docs.
@@ -29,8 +29,59 @@ define('DOCS_DIR', __DIR__ . '/../public/docs');
 define('SUBFOLDER_ORDER', ['uml', 'figma']);
 
 // ----------------------------------------------------------------
+// Contenu du portfolio (partie facile à modifier)
+// ----------------------------------------------------------------
+
+// PROJETS : pour en ajouter un, copiez une ligne et changez les valeurs.
+// 'url' peut être un lien externe (https://...) ou une page de votre site.
+// 'url' vide = carte "bientôt" (non cliquable).
+$projects = [
+    [
+        'title' => 'Hours',
+        'desc'  => "Page d'accueil e-commerce pour une marque de vêtements, réalisée en HTML et CSS pour un client freelance.",
+        'url'   => 'https://levimohamed.github.io/frount-end',
+        'tags'  => ['HTML', 'CSS', 'Freelance'],
+    ],
+    [
+        'title' => 'Ce portfolio',
+        'desc'  => 'Un site PHP en lecture seule, déployé sur Vercel, qui regroupe mes modules et leurs exercices.',
+        'url'   => 'index.php#modules',
+        'tags'  => ['PHP', 'Vercel'],
+    ],
+    [
+        'title' => 'Prochain projet',
+        'desc'  => 'Un nouveau projet sera ajouté ici.',
+        'url'   => '',
+        'tags'  => [],
+    ],
+];
+
+// COMPÉTENCES : groupes affichés dans la section "Compétences".
+$skills = [
+    ['title' => 'Front-end', 'icon' => 'monitor', 'items' => ['HTML', 'CSS', 'JavaScript', 'Figma']],
+    ['title' => 'Back-end',  'icon' => 'server',  'items' => ['PHP', 'Python', 'SQL', 'MySQL']],
+    ['title' => 'Outils',    'icon' => 'tool',    'items' => ['Git et GitHub', 'Vercel', 'UML', 'StarUML']],
+];
+
+// MENU : [ancre, libellé, icône]
+$nav = [
+    ['accueil',     'Accueil',     'home'],
+    ['apropos',     'À propos',    'user'],
+    ['competences', 'Compétences', 'code'],
+    ['projets',     'Projets',     'folder'],
+    ['modules',     'Modules',     'book'],
+    ['contact',     'Contact',     'mail'],
+];
+
+// ----------------------------------------------------------------
 // Helpers
 // ----------------------------------------------------------------
+
+/** Affiche une icône SVG définie dans le "sprite" en haut de la page. */
+function ic(string $id): string {
+    return '<svg class="ic" aria-hidden="true" focusable="false"><use href="#i-' . $id . '"/></svg>';
+}
+
 function loadMeta(): array {
     $file = DOCS_DIR . '/meta.json';
     if (is_file($file)) {
@@ -80,7 +131,9 @@ function matiereDir(string $code): ?string {
     if ($realDocs === false) return null;
     $real = realpath($realDocs . '/' . $code);
     if ($real === false) return null;
-    if (strpos($real, $realDocs) !== 0) return null;
+    // Correctif : on compare avec le séparateur final pour éviter qu'un
+    // dossier voisin ("docs-autre") passe le test du préfixe.
+    if (strpos($real, $realDocs . DIRECTORY_SEPARATOR) !== 0) return null;
     if (!is_dir($real)) return null;
     return $real;
 }
@@ -90,7 +143,7 @@ function subfolderDir(string $matiereRealDir, string $sub): ?string {
     $sub = safeSegment($sub);
     $real = realpath($matiereRealDir . '/' . $sub);
     if ($real === false) return null;
-    if (strpos($real, $matiereRealDir) !== 0) return null;
+    if (strpos($real, $matiereRealDir . DIRECTORY_SEPARATOR) !== 0) return null;
     if (!is_dir($real)) return null;
     return $real;
 }
@@ -202,250 +255,425 @@ if ($currentDir !== null) {
 }
 
 $matieres = listMatieres();
+$pageTitle = $currentDir !== null
+    ? htmlspecialchars($currentCode) . ' — Mohamed Tarchouli'
+    : 'Mohamed Tarchouli — Stagiaire en développement web full stack';
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?= $currentDir !== null ? htmlspecialchars($currentCode) . ' — ' : '' ?>Portfolio des matières</title>
+<title><?= $pageTitle ?></title>
+<meta name="description" content="Portfolio de Mohamed Tarchouli, stagiaire en développement web full stack : projets, compétences, modules et exercices.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1C2333;
-    --paper:#F7F5F0;
-    --paper-alt:#EFEAE0;
-    --accent:#8B5E34;
-    --accent-2:#4B6355;
-    --line:#D8D3C7;
+    --black:#000;
+    --white:#fff;
+    --g1:#f3f3f3;
+    --g2:#e2e2e2;
+    --g3:#6a6a6a;
+    --g4:#a6a6a6;
+    --wrap:1180px;
+    --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+    --body:"DM Sans",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
   *{box-sizing:border-box;}
-  body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;}
-  h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-weight:600;margin:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--white);color:var(--black);
+    font-family:var(--body);font-size:1.05rem;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
   a{color:inherit;text-decoration:none;}
+  h1,h2,h3{font-family:var(--display);margin:0;line-height:1.05;letter-spacing:-0.03em;}
+  :focus-visible{outline:2px solid currentColor;outline-offset:3px;}
 
-  /* ---------- Barre de navigation ---------- */
-  nav.topbar{
-    position:sticky; top:0; z-index:10;
-    background:var(--paper);
-    border-bottom:1px solid var(--line);
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 28px;}
+  .ic{width:1.15em;height:1.15em;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .sprite{position:absolute;width:0;height:0;overflow:hidden;}
+
+  /* ---------- Menu ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(0,0,0,.92);color:var(--white);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(255,255,255,.14);
   }
-  nav.topbar .bar{
-    max-width:960px;margin:0 auto;padding:18px 24px;
-    display:flex;align-items:center;justify-content:space-between;
-    gap:16px;flex-wrap:wrap;
+  .topbar .bar{
+    max-width:var(--wrap);margin:0 auto;padding:14px 28px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
   }
-  nav.topbar .brand{
-    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    font-size:1.15rem;
+  .brand{font-family:var(--display);font-weight:700;font-size:1.2rem;letter-spacing:-0.02em;}
+  .links{display:flex;gap:4px;}
+  .links a{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 14px;border-radius:999px;
+    font-size:.95rem;color:var(--g4);
+    transition:color .2s,background .2s;
   }
-  nav.topbar .links{display:flex;gap:26px;}
-  nav.topbar .links a{font-size:0.92rem;color:#4b4536;}
-  nav.topbar .links a:hover{color:var(--accent);}
+  .links a:hover{color:var(--white);background:rgba(255,255,255,.12);}
 
-  header.site{padding:48px 24px 40px;max-width:960px;margin:0 auto;border-bottom:1px solid var(--line);
-    display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
-  header.site .avatar{
-    flex:0 0 auto;
-    width:112px;height:112px;
-    border-radius:50%;
-    object-fit:cover;
-    border:1px solid var(--line);
+  /* ---------- Hero (fond noir + grille animée) ---------- */
+  .hero{position:relative;overflow:hidden;background:var(--black);color:var(--white);isolation:isolate;}
+  .hero::before{
+    content:"";position:absolute;inset:0;z-index:-1;
+    background-image:
+      linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px);
+    background-size:56px 56px;
+    -webkit-mask-image:radial-gradient(ellipse 75% 85% at 72% 45%,#000,transparent 78%);
+    mask-image:radial-gradient(ellipse 75% 85% at 72% 45%,#000,transparent 78%);
+    animation:drift 28s linear infinite;
   }
-  header.site .intro{flex:1 1 260px;min-width:0;}
-  header.site .kicker{font-size:0.85rem;color:var(--accent-2);margin-bottom:10px;}
-  header.site h1{font-size:2.6rem;letter-spacing:-0.01em;}
-  header.site p{max-width:52ch;color:#4b4536;margin-top:12px;}
-
-  main{max-width:960px;margin:0 auto;padding:40px 24px 80px;}
-
-  .section-block{padding-top:52px;}
-  .section-block:first-child{padding-top:0;}
-  .section-block h2{
-    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    font-size:1.7rem;margin-bottom:20px;
+  .hero::after{
+    content:"";position:absolute;z-index:-1;
+    width:520px;height:520px;right:6%;top:8%;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.16),transparent 65%);
+    animation:float 14s ease-in-out infinite alternate;
   }
+  @keyframes drift{to{background-position:56px 56px,56px 56px;}}
+  @keyframes float{from{transform:translate(0,0);}to{transform:translate(-70px,60px);}}
 
-  /* ---------- Projets ---------- */
-  .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
-  .project-card{background:var(--paper-alt);border:1px solid var(--line);padding:22px 20px;}
-  .project-card h3{font-size:1.05rem;margin:0 0 8px;font-weight:600;}
-  .project-card p{margin:0;color:#4b4536;font-size:0.9rem;}
-
-  /* ---------- Contact ---------- */
-  .contact-list{list-style:none;margin:0;padding:0;}
-  .contact-list li{padding:10px 0;border-top:1px solid var(--line);display:flex;gap:10px;font-size:0.95rem;}
-  .contact-list li:last-child{border-bottom:1px solid var(--line);}
-  .contact-list .label{color:#8a8272;min-width:90px;}
-  .contact-list a{border-bottom:1px solid var(--accent-2);color:var(--accent-2);}
-
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px;}
-  .card{position:relative;display:flex;flex-direction:column;background:var(--paper-alt);border:1px solid var(--line);padding:22px 20px 20px;height:170px;}
-.card::before{content:"";position:absolute;top:0;left:20px;width:38px;height:8px;background:var(--accent);}
-.card .code{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:1.6rem;margin-top:14px;}
-.card .name{
-  color:#4b4536;font-size:0.92rem;margin-top:6px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden;text-overflow:ellipsis;
-}
-.card .count{margin-top:auto;padding-top:10px;font-size:0.8rem;color:var(--accent-2);}
-.card:hover{border-color:var(--accent);}
-
-  .empty{color:#6b6455;padding:40px 0;}
-
-  .back{display:inline-block;margin-bottom:24px;font-size:0.9rem;color:var(--accent-2);border-bottom:1px solid var(--accent-2);}
-  .subject-title{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
-  .subject-title h1{font-size:2.2rem;}
-  .subject-title .full-name{color:#6b6455;font-size:1rem;}
-  .subject-sub{color:#6b6455;margin-bottom:28px;font-size:0.92rem;}
-
-  /* ---------- Sous-dossiers (UML, FIGMA, ...) ---------- */
-  .subfolder-block{margin-top:36px;}
-  .subfolder-block h3{
-    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    font-size:1.3rem;
-    letter-spacing:0.02em;
-    text-transform:uppercase;
-    color:var(--ink);
-    margin:0 0 4px;
-    padding-bottom:10px;
-    border-bottom:2px solid var(--accent);
-    display:inline-block;
+  .hero-inner{
+    max-width:var(--wrap);margin:0 auto;padding:80px 28px;
+    min-height:calc(100vh - 62px);
+    display:flex;align-items:center;justify-content:space-between;gap:48px;
   }
-  .subfolder-count{color:#8a8272;font-size:0.82rem;margin-bottom:4px;}
+  .hero h1{font-size:clamp(3.4rem,10vw,8rem);font-weight:700;letter-spacing:-0.05em;line-height:.92;}
+  .hero .role{font-size:clamp(1.15rem,2.2vw,1.6rem);font-weight:500;margin:28px 0 0;}
+  .hero .lead{color:var(--g4);max-width:46ch;margin:14px 0 0;}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:14px 24px;border-radius:999px;border:1.5px solid var(--white);
+    font-weight:500;transition:background .2s,color .2s;
+  }
+  .btn.solid{background:var(--white);color:var(--black);}
+  .btn.solid:hover{background:transparent;color:var(--white);}
+  .btn.ghost{border-color:rgba(255,255,255,.4);color:var(--white);}
+  .btn.ghost:hover{background:var(--white);color:var(--black);border-color:var(--white);}
 
-  ul.exercices{list-style:none;margin:0;padding:0;border-top:1px solid var(--line);}
-  ul.exercices li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 4px;border-bottom:1px solid var(--line);}
+  .avatar{
+    position:relative;flex:0 0 auto;overflow:hidden;
+    width:clamp(180px,24vw,300px);aspect-ratio:1;border-radius:50%;
+    border:1px solid rgba(255,255,255,.35);background:#111;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--display);font-size:3.4rem;font-weight:700;color:var(--g4);
+  }
+  .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);}
+
+  .hero.mini .hero-inner{min-height:0;padding:64px 28px 56px;}
+  .hero.mini h1{font-size:clamp(2.6rem,7vw,5rem);}
+
+  /* Une seule séquence d'entrée au chargement */
+  .rise{opacity:0;transform:translateY(20px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s);}
+  @keyframes rise{to{opacity:1;transform:none;}}
+
+  /* ---------- Sections ---------- */
+  .section{padding:104px 0;scroll-margin-top:62px;}
+  .section.alt{background:var(--g1);}
+  .section.dark{background:var(--black);color:var(--white);}
+  .section-head{margin-bottom:44px;max-width:60ch;}
+  .section-head h2,.about h2{font-size:clamp(2.2rem,5vw,3.6rem);}
+  .section-head p{color:var(--g3);margin:14px 0 0;}
+  .dark .section-head p{color:var(--g4);}
+
+  /* À propos */
+  .about{display:grid;grid-template-columns:1fr 1.4fr;gap:48px;align-items:start;}
+  .about .text p{font-size:1.25rem;line-height:1.6;margin:0 0 18px;}
+  .about .text p:last-child{margin-bottom:0;color:var(--g3);}
+
+  /* Compétences */
+  .skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+  .skill-group{border:1.5px solid var(--black);padding:28px;}
+  .skill-group h3{display:flex;align-items:center;gap:12px;font-size:1.5rem;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
+  .chip{border:1px solid currentColor;border-radius:999px;padding:4px 14px;font-size:.92rem;}
+
+  /* Projets (cartes-liens) */
+  .projects{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+  .project{
+    display:flex;flex-direction:column;gap:12px;min-height:240px;padding:28px;
+    background:var(--white);border:1.5px solid var(--black);
+    transition:background .25s,color .25s;
+  }
+  .project h3{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:1.7rem;}
+  .project p{margin:0;color:var(--g3);transition:color .25s;}
+  .project .chips{margin-top:auto;}
+  .project .go{width:1.3em;height:1.3em;transition:transform .25s;}
+  .project:hover{background:var(--black);color:var(--white);}
+  .project:hover p{color:var(--g4);}
+  .project:hover .go{transform:translate(3px,-3px);}
+  .project.soon{border-style:dashed;border-color:var(--g4);color:var(--g3);}
+  .project.soon:hover{background:var(--white);color:var(--g3);}
+
+  /* Modules */
+  .empty{color:var(--g3);padding:24px 0;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;}
+  .card{
+    position:relative;display:flex;flex-direction:column;height:180px;
+    background:var(--white);border:1.5px solid var(--black);padding:24px 22px 20px;
+    transition:background .25s,color .25s;
+  }
+  .card::before{content:"";position:absolute;top:-1.5px;left:22px;width:38px;height:8px;background:var(--black);transition:background .25s;}
+  .card .code{font-family:var(--display);font-size:2rem;font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-top:10px;}
+  .card .name{
+    color:var(--g3);font-size:.95rem;margin-top:6px;
+    display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .card .count{margin-top:auto;padding-top:10px;font-size:.85rem;color:var(--g3);}
+  .card:hover{background:var(--black);color:var(--white);}
+  .card:hover::before{background:var(--white);}
+  .card:hover .name,.card:hover .count{color:var(--g4);}
+
+  /* Contact */
+  .contact-list{list-style:none;margin:0;padding:0;border-top:1px solid rgba(255,255,255,.22);}
+  .contact-list li{border-bottom:1px solid rgba(255,255,255,.22);}
+  .contact-list a{display:flex;align-items:center;gap:18px;padding:26px 4px;transition:padding .25s;}
+  .contact-list a:hover{padding-left:16px;}
+  .contact-list .ic{width:1.5em;height:1.5em;}
+  .contact-list .label{color:var(--g4);min-width:96px;}
+  .contact-list .value{flex:1;min-width:0;font-family:var(--display);font-size:clamp(1.05rem,2.6vw,1.8rem);overflow-wrap:anywhere;}
+  .contact-list .go{color:var(--g4);}
+
+  footer{background:var(--black);color:var(--g4);border-top:1px solid rgba(255,255,255,.14);font-size:.88rem;}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-top:26px;padding-bottom:26px;}
+  footer a{display:inline-flex;align-items:center;gap:8px;transition:color .2s;}
+  footer a:hover{color:var(--white);}
+
+  /* ---------- Page d'un module ---------- */
+  main.page{max-width:var(--wrap);margin:0 auto;padding:56px 28px 110px;}
+  .back{display:inline-flex;align-items:center;gap:8px;margin-bottom:32px;font-weight:500;border-bottom:1.5px solid var(--black);padding-bottom:2px;}
+  .subject-title{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
+  .subject-title h1{font-size:clamp(2.6rem,6vw,4.2rem);}
+  .subject-title .full-name{color:var(--g3);font-size:1.15rem;}
+  .subject-sub{color:var(--g3);margin-bottom:32px;}
+
+  .subfolder-block{margin-top:44px;}
+  .subfolder-block h3{font-size:1.5rem;letter-spacing:.01em;display:inline-block;padding-bottom:8px;border-bottom:2px solid var(--black);}
+  .subfolder-count{color:var(--g3);font-size:.88rem;margin:8px 0 12px;}
+
+  ul.exercices{list-style:none;margin:0;padding:0;border-top:1px solid var(--g2);}
+  ul.exercices li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 8px;border-bottom:1px solid var(--g2);transition:background .2s;}
+  ul.exercices li:hover{background:var(--g1);}
   .file-info{display:flex;align-items:baseline;gap:12px;min-width:0;}
-  .file-info .ext{flex:0 0 auto;background:var(--ink);color:var(--paper);font-size:0.72rem;padding:3px 7px;}
-  .file-info .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .file-info .fsize{flex:0 0 auto;color:#8a8272;font-size:0.85rem;}
-  .dl-btn{flex:0 0 auto;border:1px solid var(--ink);padding:8px 16px;font-size:0.88rem;white-space:nowrap;}
-  .dl-btn:hover{background:var(--ink);color:var(--paper);}
-
-  footer{max-width:960px;margin:0 auto;padding:24px;color:#9a927e;font-size:0.8rem;text-align:center;}
-
-  @media (max-width:480px){
-    nav.topbar .bar{padding:14px 18px;}
-    nav.topbar .links{gap:16px;}
-    header.site{padding:32px 18px 24px;gap:20px;}
-    header.site .avatar{width:84px;height:84px;}
-    header.site h1{font-size:2rem;}
-    main{padding:28px 18px 60px;}
+  .file-info .ext{flex:0 0 auto;background:var(--black);color:var(--white);font-size:.72rem;padding:3px 8px;border-radius:3px;}
+  .file-info .fname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+  .file-info .fsize{flex:0 0 auto;color:var(--g3);font-size:.85rem;}
+  .dl-btn{
+    flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;
+    border:1.5px solid var(--black);border-radius:999px;padding:9px 18px;font-size:.9rem;white-space:nowrap;
+    transition:background .2s,color .2s;
   }
-</style>
-<style>
-  :root{--ink:#101010;--paper:#fbfbf9;--paper-alt:#f1f1ee;--accent:#111;--accent-2:#555;--line:#deded9;--muted:#74746e;--max:1280px}
-  html{scroll-behavior:smooth;scroll-padding-top:92px}
-  body{background:var(--paper);color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.65;position:relative;isolation:isolate}
-  body:before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 12% 18%,rgba(0,0,0,.045),transparent 38%),radial-gradient(ellipse at 86% 56%,rgba(0,0,0,.035),transparent 36%);animation:ambient-drift 24s ease-in-out infinite alternate}
-  @keyframes ambient-drift{from{transform:translate3d(-1%,0,0) scale(1)}to{transform:translate3d(1%,1%,0) scale(1.04)}}
-  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
-  a{color:inherit}
-  nav.topbar{background:rgba(251,251,249,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-  nav.topbar .bar{max-width:var(--max);min-height:76px;padding:14px 28px}
-  nav.topbar .brand{font-family:inherit;font-size:.96rem;font-weight:750;letter-spacing:-.04em;display:flex;align-items:center;gap:11px}
-  nav.topbar .brand:before{content:"MT";display:grid;place-items:center;width:34px;height:34px;background:#111;color:#fff;border-radius:50%;font-size:.68rem;letter-spacing:.02em}
-  nav.topbar .links{align-items:center;gap:5px}
-  nav.topbar .links a{font-size:.82rem;color:#555;padding:9px 12px;border-radius:99px;transition:background .2s,color .2s}
-  nav.topbar .links a:hover{background:#111;color:#fff}
-  .nav-icon{width:15px;height:15px;vertical-align:-3px;margin-right:5px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-  header.site{max-width:var(--max);min-height:500px;padding:90px 36px 82px;position:relative;align-items:center;gap:68px;border-bottom:1px solid var(--line);overflow:hidden}
-  header.site:after{content:none}
-  header.site .avatar{width:190px;height:190px;border:0;border-radius:50%;object-fit:cover;filter:none;box-shadow:0 0 0 1px var(--line),0 0 0 10px var(--paper),0 0 0 11px var(--line)}
-  header.site .intro{flex:1}
-  header.site .kicker{font-size:.72rem;color:#555;text-transform:uppercase;letter-spacing:.18em;font-weight:700;margin-bottom:15px}
-  header.site h1{font-family:inherit;font-size:clamp(4rem,9vw,7.5rem);line-height:.94;letter-spacing:-.075em;font-weight:760;max-width:1000px}
-  header.site p{font-size:1.05rem;max-width:54ch;color:#5f5f59;margin:23px 0 0}
-  main{max-width:var(--max);padding:86px 36px 120px}
-  .section-block{padding-top:88px}
-  .section-block:first-child{padding-top:0}
-  .section-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:28px}
-  .section-heading h2,.section-block h2{font-family:inherit;font-size:clamp(1.8rem,4vw,2.55rem);letter-spacing:-.06em;line-height:1.1;margin:0 0 25px;font-weight:700}
-  .section-heading h2{margin:0}
-  .eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
-  .projects-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-  .project-card{min-height:170px;background:transparent;border:1px solid var(--line);padding:24px;transition:transform .2s,border-color .2s,background .2s}
-  .project-card:hover{transform:translateY(-3px);border-color:#111;background:#fff}
-  a.project-card{display:block;color:inherit;text-decoration:none}
-  a.project-card:focus-visible{outline:2px solid #111;outline-offset:4px}
-  .project-card h3{font-size:1rem;letter-spacing:-.02em}
-  .project-card p{color:var(--muted);max-width:48ch}
-  .project-mark{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;color:#888;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
-  .project-mark span:last-child{font-size:1.2rem;color:#111}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-  .card{height:190px;background:transparent;border:1px solid var(--line);padding:22px 22px 18px;transition:background .2s,color .2s,transform .2s,border-color .2s}
-  .card:before{display:none}
-  .card:after{content:"↗";position:absolute;right:20px;top:19px;font-size:1.05rem;color:#888;transition:transform .2s,color .2s}
-  .card:hover{background:#111;color:#fff;border-color:#111;transform:translateY(-3px)}
-  .card:hover:after{transform:translate(2px,-2px);color:#fff}
-  .card .code{font-family:inherit;font-size:1.65rem;font-weight:700;letter-spacing:-.06em;margin-top:3px}
-  .card .name{color:var(--muted);font-size:.86rem;margin-top:7px}
-  .card:hover .name,.card:hover .count{color:#c7c7c2}
-  .card .count{color:#777;font-size:.76rem;letter-spacing:.02em}
-  .about-layout{display:grid;grid-template-columns:1.2fr .8fr;gap:48px;align-items:start;border-top:1px solid var(--line);padding-top:28px}
-  .about-copy{font-size:1.12rem;max-width:58ch;color:#454540;margin:0}
-  .about-copy strong{color:#111}
-  .focus-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-  .focus-list li{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.9rem}
-  .focus-list li span:last-child{color:var(--muted);text-align:right}
-  .contact-layout{display:grid;grid-template-columns:.8fr 1.2fr;gap:40px;align-items:start}
-  .contact-note{font-size:1.02rem;color:#555;margin:0;max-width:36ch}
-  .contact-list{border-top:1px solid var(--line)}
-  .contact-list li{padding:16px 2px;border-color:var(--line);align-items:center;gap:14px}
-  .contact-icon{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--line);border-radius:50%;color:#111;flex:0 0 auto}
-  .contact-icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-  .contact-list .label{min-width:72px;color:#777;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}
-  .contact-list a{margin-left:auto;border:0;color:#111;font-size:.88rem;text-align:right}
-  .contact-list a:hover{text-decoration:underline;text-underline-offset:4px}
-  .back{margin-bottom:32px;color:#333;border-color:#777}
-  .subject-title h1{font-family:inherit;letter-spacing:-.06em}
-  .subject-title .full-name,.subject-sub{color:var(--muted)}
-  .subfolder-block h3{font-family:inherit;border-bottom:1px solid #111;letter-spacing:.1em}
-  ul.exercices li{padding:18px 4px}
-  .file-info .ext{background:#111;border-radius:3px}
-  .dl-btn{border-radius:99px;padding:8px 16px;transition:background .2s,color .2s}
-  footer{max-width:var(--max);border-top:1px solid var(--line);padding:24px 28px;color:#777;letter-spacing:.04em}
-  @media(max-width:680px){header.site{min-height:0;padding:58px 22px 65px;gap:32px}header.site .avatar{width:108px;height:108px}header.site h1{font-size:clamp(3rem,12vw,5rem)}main{padding:52px 22px 70px}.section-block{padding-top:66px}.about-layout,.contact-layout{grid-template-columns:1fr;gap:25px}.projects-grid{grid-template-columns:1fr}.contact-list a{max-width:58%;overflow-wrap:anywhere}nav.topbar .bar{padding:12px 18px}nav.topbar .links{gap:0}nav.topbar .links a{font-size:.76rem;padding:8px 7px}.nav-icon{display:none}}
-  @media(max-width:420px){nav.topbar .brand{font-size:.84rem}nav.topbar .links a{font-size:.7rem;padding:7px 5px}header.site .avatar{width:82px;height:82px}header.site{gap:25px}header.site p{font-size:.94rem}.section-heading{align-items:start;flex-direction:column}.file-info{gap:8px}.file-info .fsize{display:none}.dl-btn{padding:7px 11px;font-size:.8rem}}
+  .dl-btn:hover{background:var(--black);color:var(--white);}
+
+  /* ---------- Mobile ---------- */
+  @media (max-width:860px){
+    .hero-inner{flex-direction:column-reverse;align-items:flex-start;gap:36px;min-height:0;padding:56px 24px 72px;}
+    .avatar{width:150px;font-size:2.6rem;}
+    .section{padding:72px 0;}
+    .about{grid-template-columns:1fr;gap:24px;}
+  }
+  @media (max-width:700px){
+    .links{gap:0;}
+    .links a{padding:10px;}
+    .links a .lbl{display:none;}
+    .brand{font-size:1.05rem;}
+  }
+  @media (max-width:480px){
+    .wrap,.topbar .bar,main.page{padding-left:18px;padding-right:18px;}
+    .hero-inner,.hero.mini .hero-inner{padding-left:18px;padding-right:18px;}
+    .contact-list a{gap:12px;}
+    .contact-list .label{display:none;}
+    ul.exercices li{flex-wrap:wrap;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    .hero::before,.hero::after{animation:none;}
+    .rise{animation:none;opacity:1;transform:none;}
+  }
 </style>
 </head>
-<body>
+<body id="top">
 
-<nav class="topbar">
+<!-- Icônes (sprite SVG) -->
+<svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></symbol>
+  <symbol id="i-linkedin" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></symbol>
+  <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></symbol>
+  <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+</svg>
+
+<nav class="topbar" aria-label="Navigation principale">
   <div class="bar">
-    <div class="brand">Mohamed Tarchouli</div>
+    <a class="brand" href="index.php#accueil">Mohamed Tarchouli</a>
     <div class="links">
-      <a href="index.php#accueil"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg>Accueil</a>
-      <a href="index.php#projets"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6M7 16h3"/></svg>Projets</a>
-      <a href="index.php#modules"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>Modules</a>
-      <a href="index.php#contact"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>Contact</a>
+      <?php foreach ($nav as $n): ?>
+        <a href="index.php#<?= $n[0] ?>" aria-label="<?= htmlspecialchars($n[1]) ?>"><?= ic($n[2]) ?><span class="lbl"><?= htmlspecialchars($n[1]) ?></span></a>
+      <?php endforeach; ?>
     </div>
   </div>
 </nav>
 
 <?php if ($currentDir === null): ?>
-<header class="site" id="accueil">
-  <!-- LIGNE À MODIFIER : remplacez ce src par le lien (ou chemin) de votre vraie photo -->
-  <img class="avatar" src="/images/profile.png" alt="Photo de Mohamed Tarchouli">
-  <div class="intro">
-    <div class="kicker">Stagiaire en développement web full stack</div>
-    <h1>Mohamed<br>Tarchouli<span aria-hidden="true">.</span></h1>
-    <p>Stagiaire en développement web full stack, intéressé par la création d’expériences numériques simples, utiles et bien construites.</p>
+
+<!-- ======================= ACCUEIL ======================= -->
+<header class="hero" id="accueil">
+  <div class="hero-inner">
+    <div class="intro">
+      <h1 class="rise" style="--d:.05s">Mohamed<br>Tarchouli</h1>
+      <p class="role rise" style="--d:.25s">Stagiaire en développement web full stack</p>
+      <p class="lead rise" style="--d:.4s">Je conçois des interfaces claires et je construis la partie serveur qui va avec. Voici mes projets, mes compétences et les exercices de mes modules.</p>
+      <div class="cta rise" style="--d:.55s">
+        <a class="btn solid" href="#projets"><?= ic('folder') ?>Voir mes projets</a>
+        <a class="btn ghost" href="#contact"><?= ic('mail') ?>Me contacter</a>
+      </div>
+    </div>
+    <div class="avatar rise" style="--d:.3s">
+      <span aria-hidden="true">MT</span>
+      <img src="/images/profile.png" alt="Photo de Mohamed Tarchouli" onerror="this.remove()">
+    </div>
   </div>
 </header>
-<?php else: ?>
-<header class="site">
-  <div class="intro">
-    <div class="kicker">Stagiaire en développement web full stack</div>
-    <h1>Exercices</h1>
-  </div>
-</header>
-<?php endif; ?>
 
 <main>
-<?php if ($currentDir !== null): ?>
 
-  <a class="back" href="index.php">← Toutes les Modules</a>
+  <!-- ======================= À PROPOS ======================= -->
+  <section class="section" id="apropos">
+    <div class="wrap about">
+      <h2>À propos</h2>
+      <div class="text">
+        <p>Je suis stagiaire en développement web full stack. Je dessine des interfaces simples et lisibles en front-end, et je construis la partie serveur avec PHP, Python et SQL.</p>
+        <p>En parallèle, je prends des missions freelance en front-end. Ce portfolio rassemble ce que je réalise, au travail comme en formation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= COMPÉTENCES ======================= -->
+  <section class="section alt" id="competences">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Compétences</h2>
+        <p>Les langages et les outils que j'utilise au quotidien.</p>
+      </div>
+      <div class="skills">
+        <?php foreach ($skills as $g): ?>
+          <div class="skill-group">
+            <h3><?= ic($g['icon']) ?><?= htmlspecialchars($g['title']) ?></h3>
+            <div class="chips">
+              <?php foreach ($g['items'] as $item): ?>
+                <span class="chip"><?= htmlspecialchars($item) ?></span>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= PROJETS ======================= -->
+  <section class="section" id="projets">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Projets</h2>
+        <p>Cliquez sur un projet pour l'ouvrir.</p>
+      </div>
+      <div class="projects">
+        <?php foreach ($projects as $p):
+          $isLink   = $p['url'] !== '';
+          $external = $isLink && preg_match('#^https?://#', $p['url']);
+          $tag      = $isLink ? 'a' : 'div';
+          $attrs    = $isLink
+              ? ' href="' . htmlspecialchars($p['url']) . '"' . ($external ? ' target="_blank" rel="noopener"' : '')
+              : '';
+        ?>
+          <<?= $tag ?> class="project<?= $isLink ? '' : ' soon' ?>"<?= $attrs ?>>
+            <h3>
+              <span><?= htmlspecialchars($p['title']) ?></span>
+              <?php if ($isLink): ?><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?><?php endif; ?>
+            </h3>
+            <p><?= htmlspecialchars($p['desc']) ?></p>
+            <?php if (!empty($p['tags'])): ?>
+              <div class="chips">
+                <?php foreach ($p['tags'] as $t): ?>
+                  <span class="chip"><?= htmlspecialchars($t) ?></span>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+          </<?= $tag ?>>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= MODULES ======================= -->
+  <section class="section alt" id="modules">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Modules</h2>
+        <p>Retrouvez ici tous les modules et leurs exercices. Cliquez sur un module pour voir les fichiers disponibles.</p>
+      </div>
+      <?php if (empty($matieres)): ?>
+        <p class="empty">Aucune matière n'a encore été ajoutée. Ajoutez un dossier dans public/docs/ puis faites un push.</p>
+      <?php else: ?>
+        <div class="grid">
+          <?php foreach ($matieres as $m): ?>
+            <a class="card" href="index.php?matiere=<?= urlencode($m['code']) ?>">
+              <div class="code"><?= htmlspecialchars($m['code']) ?></div>
+              <div class="name"><?= htmlspecialchars($meta[$m['code']] ?? '') ?></div>
+              <div class="count"><?= $m['count'] ?> fichier<?= $m['count'] > 1 ? 's' : '' ?></div>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+  </section>
+
+  <!-- ======================= CONTACT ======================= -->
+  <section class="section dark" id="contact">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Contact</h2>
+        <p>Un stage, une mission freelance ou une question ? Écrivez-moi.</p>
+      </div>
+      <ul class="contact-list">
+        <li><a href="mailto:mohamed.tarchouli.contact@gmail.com"><?= ic('mail') ?><span class="label">Email</span><span class="value">mohamed.tarchouli.contact@gmail.com</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
+        <li><a href="https://github.com/mohamed-workspace" target="_blank" rel="noopener"><?= ic('github') ?><span class="label">GitHub</span><span class="value">mohamed-workspace</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
+        <li><a href="https://linkedin.com/in/mohamed-tarchouli-691583403?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" rel="noopener"><?= ic('linkedin') ?><span class="label">LinkedIn</span><span class="value">Mohamed Tarchouli</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<?php else: ?>
+
+<!-- ======================= PAGE D'UN MODULE ======================= -->
+<header class="hero mini">
+  <div class="hero-inner">
+    <h1 class="rise">Exercices</h1>
+  </div>
+</header>
+
+<main class="page">
+
+  <a class="back" href="index.php#modules"><?= ic('arrow-left') ?>Tous les modules</a>
 
   <div class="subject-title">
     <h1><?= htmlspecialchars($currentCode) ?></h1>
@@ -456,7 +684,7 @@ $matieres = listMatieres();
   <div class="subject-sub"><?= $totalCount ?> fichier<?= $totalCount > 1 ? 's' : '' ?> disponible<?= $totalCount > 1 ? 's' : '' ?></div>
 
   <?php if ($totalCount === 0): ?>
-    <p class="empty">Aucun exercice n'a encore été ajouté pour cette Module.</p>
+    <p class="empty">Aucun exercice n'a encore été ajouté pour ce module.</p>
   <?php endif; ?>
 
   <?php if (!empty($rootExercices)): ?>
@@ -468,8 +696,8 @@ $matieres = listMatieres();
             <span class="fname"><?= htmlspecialchars($ex['name']) ?></span>
             <span class="fsize"><?= $ex['size'] ?></span>
           </div>
-          <a class="dl-btn" href="index.php?action=download&matiere=<?= urlencode($currentCode) ?>&file=<?= urlencode($ex['name']) ?>">
-            Télécharger
+          <a class="dl-btn" href="index.php?action=download&amp;matiere=<?= urlencode($currentCode) ?>&amp;file=<?= urlencode($ex['name']) ?>">
+            <?= ic('download') ?>Télécharger
           </a>
         </li>
       <?php endforeach; ?>
@@ -491,8 +719,8 @@ $matieres = listMatieres();
                 <span class="fname"><?= htmlspecialchars($ex['name']) ?></span>
                 <span class="fsize"><?= $ex['size'] ?></span>
               </div>
-              <a class="dl-btn" href="index.php?action=download&matiere=<?= urlencode($currentCode) ?>&dossier=<?= urlencode($sf['name']) ?>&file=<?= urlencode($ex['name']) ?>">
-                Télécharger
+              <a class="dl-btn" href="index.php?action=download&amp;matiere=<?= urlencode($currentCode) ?>&amp;dossier=<?= urlencode($sf['name']) ?>&amp;file=<?= urlencode($ex['name']) ?>">
+                <?= ic('download') ?>Télécharger
               </a>
             </li>
           <?php endforeach; ?>
@@ -501,55 +729,16 @@ $matieres = listMatieres();
     </div>
   <?php endforeach; ?>
 
-<?php else: ?>
-
-  <section class="section-block" id="projets">
-    <div class="section-heading"><h2>Projets sélectionnés</h2><span class="eyebrow">Apprendre · Concevoir · Construire</span></div>
-    <div class="projects-grid">
-      <a class="project-card" href="index.php?matiere=M201" aria-label="Voir les travaux de modélisation UML">
-        <div class="project-mark"><span>01 / Conception</span><span aria-hidden="true">↗</span></div>
-        <h3>Modélisation UML</h3>
-        <p>Analyse des besoins et représentation de systèmes avec des diagrammes clairs et structurés.</p>
-      </a>
-      <a class="project-card" href="index.php?matiere=M202" aria-label="Voir les travaux de gestion de projet et outils collaboratifs">
-        <div class="project-mark"><span>02 / Gestion de projet</span><span aria-hidden="true">↗</span></div>
-        <h3>Organisation & outils</h3>
-        <p>Travaux pratiques autour de Git, de la gestion de projet Agile et des diagrammes GANTT.</p>
-      </a>
-    </div>
-  </section>
-
-  <section class="section-block" id="modules">
-    <div class="section-heading"><h2>Modules</h2><span class="eyebrow">Cours & travaux pratiques</span></div>
-    <?php if (empty($matieres)): ?>
-      <p class="empty">Aucune matière n'a encore été ajoutée. Ajoutez un dossier dans public/docs/ puis faites un push.</p>
-    <?php else: ?>
-      <div class="grid">
-        <?php foreach ($matieres as $m): ?>
-          <a class="card" href="index.php?matiere=<?= urlencode($m['code']) ?>">
-            <div class="code"><?= htmlspecialchars($m['code']) ?></div>
-            <div class="name"><?= htmlspecialchars($meta[$m['code']] ?? '') ?></div>
-            <div class="count"><?= $m['count'] ?> fichier<?= $m['count'] > 1 ? 's' : '' ?></div>
-          </a>
-        <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
-  </section>
-
-  <section class="section-block" id="contact">
-    <div class="section-heading"><h2>Contact</h2><span class="eyebrow">Restons en contact</span></div>
-    <div class="contact-layout"><p class="contact-note">Une question, une idée de projet ou simplement envie d’échanger ? Retrouvez-moi ici.</p>
-    <ul class="contact-list">
-      <li><span class="contact-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></span><span class="label">Email</span><a href="mailto:mohamed.tarchouli.contact@gmail.com">mohamed.tarchouli.contact@gmail.com</a></li>
-      <li><span class="contact-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 6v-3.9a3.4 3.4 0 0 0-.9-2.7c3-.3 6.2-1.5 6.2-6.8a5.3 5.3 0 0 0-1.4-3.7 4.9 4.9 0 0 0-.1-3.7S17.6 1 15 3a13.5 13.5 0 0 0-7 0C5.4 1 4.2 1.2 4.2 1.2A4.9 4.9 0 0 0 4.1 5 5.3 5.3 0 0 0 2.7 8.7c0 5.3 3.2 6.5 6.2 6.8A3.4 3.4 0 0 0 8 18.2V22"/></svg></span><span class="label">GitHub</span><a href="https://github.com/mohamed-workspace" target="_blank" rel="noopener">mohamed-workspace</a></li>
-      <li><span class="contact-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></span><span class="label">LinkedIn</span><a href="https://linkedin.com/in/mohamed-tarchouli-691583403?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" rel="noopener">Mohamed Tarchouli</a></li>
-    </ul>
-    </div>
-  </section>
-
-<?php endif; ?>
 </main>
 
-<footer>Mohamed Tarchouli · Développement web full stack</footer>
+<?php endif; ?>
+
+<footer>
+  <div class="wrap">
+    <span>© <?= date('Y') ?> Mohamed Tarchouli · Stagiaire en développement web full stack</span>
+    <a href="#top"><?= ic('arrow-up') ?>Haut de page</a>
+  </div>
+</footer>
+
 </body>
 </html>
