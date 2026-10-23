@@ -334,9 +334,12 @@ $matieres = listMatieres();
   }
 </style>
 <style>
-  :root{--ink:#101010;--paper:#fbfbf9;--paper-alt:#f1f1ee;--accent:#111;--accent-2:#555;--line:#deded9;--muted:#74746e;--max:1120px}
+  :root{--ink:#101010;--paper:#fbfbf9;--paper-alt:#f1f1ee;--accent:#111;--accent-2:#555;--line:#deded9;--muted:#74746e;--max:1280px}
   html{scroll-behavior:smooth;scroll-padding-top:92px}
-  body{background:var(--paper);color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.65}
+  body{background:var(--paper);color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif;line-height:1.65;position:relative;isolation:isolate}
+  body:before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 12% 18%,rgba(0,0,0,.045),transparent 38%),radial-gradient(ellipse at 86% 56%,rgba(0,0,0,.035),transparent 36%);animation:ambient-drift 24s ease-in-out infinite alternate}
+  @keyframes ambient-drift{from{transform:translate3d(-1%,0,0) scale(1)}to{transform:translate3d(1%,1%,0) scale(1.04)}}
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
   a{color:inherit}
   nav.topbar{background:rgba(251,251,249,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
   nav.topbar .bar{max-width:var(--max);min-height:76px;padding:14px 28px}
@@ -346,14 +349,14 @@ $matieres = listMatieres();
   nav.topbar .links a{font-size:.82rem;color:#555;padding:9px 12px;border-radius:99px;transition:background .2s,color .2s}
   nav.topbar .links a:hover{background:#111;color:#fff}
   .nav-icon{width:15px;height:15px;vertical-align:-3px;margin-right:5px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-  header.site{max-width:var(--max);min-height:410px;padding:78px 28px 70px;position:relative;align-items:center;gap:58px;border-bottom:1px solid var(--line);overflow:hidden}
-  header.site:after{content:"PORTFOLIO · 2025—2026";position:absolute;right:28px;bottom:20px;color:#999;font-size:.65rem;letter-spacing:.16em}
-  header.site .avatar{width:168px;height:168px;border:0;border-radius:50%;filter:grayscale(1);box-shadow:0 0 0 1px var(--line),0 0 0 10px var(--paper),0 0 0 11px var(--line)}
+  header.site{max-width:var(--max);min-height:500px;padding:90px 36px 82px;position:relative;align-items:center;gap:68px;border-bottom:1px solid var(--line);overflow:hidden}
+  header.site:after{content:none}
+  header.site .avatar{width:190px;height:190px;border:0;border-radius:50%;object-fit:cover;filter:none;box-shadow:0 0 0 1px var(--line),0 0 0 10px var(--paper),0 0 0 11px var(--line)}
   header.site .intro{flex:1}
   header.site .kicker{font-size:.72rem;color:#555;text-transform:uppercase;letter-spacing:.18em;font-weight:700;margin-bottom:15px}
-  header.site h1{font-family:inherit;font-size:clamp(3.4rem,8vw,6.7rem);line-height:.94;letter-spacing:-.075em;font-weight:760;max-width:850px}
+  header.site h1{font-family:inherit;font-size:clamp(4rem,9vw,7.5rem);line-height:.94;letter-spacing:-.075em;font-weight:760;max-width:1000px}
   header.site p{font-size:1.05rem;max-width:54ch;color:#5f5f59;margin:23px 0 0}
-  main{max-width:var(--max);padding:70px 28px 100px}
+  main{max-width:var(--max);padding:86px 36px 120px}
   .section-block{padding-top:88px}
   .section-block:first-child{padding-top:0}
   .section-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:28px}
@@ -363,6 +366,8 @@ $matieres = listMatieres();
   .projects-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
   .project-card{min-height:170px;background:transparent;border:1px solid var(--line);padding:24px;transition:transform .2s,border-color .2s,background .2s}
   .project-card:hover{transform:translateY(-3px);border-color:#111;background:#fff}
+  a.project-card{display:block;color:inherit;text-decoration:none}
+  a.project-card:focus-visible{outline:2px solid #111;outline-offset:4px}
   .project-card h3{font-size:1rem;letter-spacing:-.02em}
   .project-card p{color:var(--muted);max-width:48ch}
   .project-mark{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;color:#888;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
@@ -423,15 +428,15 @@ $matieres = listMatieres();
   <!-- LIGNE À MODIFIER : remplacez ce src par le lien (ou chemin) de votre vraie photo -->
   <img class="avatar" src="/images/profile.png" alt="Photo de Mohamed Tarchouli">
   <div class="intro">
-    <div class="kicker">Portfolio scolaire · Développement & conception</div>
+    <div class="kicker">Stagiaire en développement web full stack</div>
     <h1>Mohamed<br>Tarchouli<span aria-hidden="true">.</span></h1>
-    <p>Étudiant passionné par le développement web et la conception. Je transforme les idées en projets clairs, utiles et bien construits.</p>
+    <p>Stagiaire en développement web full stack, intéressé par la création d’expériences numériques simples, utiles et bien construites.</p>
   </div>
 </header>
 <?php else: ?>
 <header class="site">
   <div class="intro">
-    <div class="kicker">Portfolio scolaire</div>
+    <div class="kicker">Stagiaire en développement web full stack</div>
     <h1>Exercices</h1>
   </div>
 </header>
@@ -501,29 +506,16 @@ $matieres = listMatieres();
   <section class="section-block" id="projets">
     <div class="section-heading"><h2>Projets sélectionnés</h2><span class="eyebrow">Apprendre · Concevoir · Construire</span></div>
     <div class="projects-grid">
-      <div class="project-card">
+      <a class="project-card" href="index.php?matiere=M201" aria-label="Voir les travaux de modélisation UML">
         <div class="project-mark"><span>01 / Conception</span><span aria-hidden="true">↗</span></div>
         <h3>Modélisation UML</h3>
         <p>Analyse des besoins et représentation de systèmes avec des diagrammes clairs et structurés.</p>
-      </div>
-      <div class="project-card">
-        <div class="project-mark"><span>02 / Design</span><span aria-hidden="true">↗</span></div>
-        <h3>Ateliers Figma</h3>
-        <p>Exploration du prototypage d’interfaces, des parcours utilisateurs et des principes visuels.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section-block" id="apropos">
-    <div class="section-heading"><h2>À propos</h2><span class="eyebrow">Un esprit curieux, une approche pratique</span></div>
-    <div class="about-layout">
-      <p class="about-copy">Je développe mes compétences en <strong>conception et développement</strong> à travers des cours, des ateliers et des projets pratiques. Ce portfolio rassemble mes travaux et ressources, organisés par module.</p>
-      <ul class="focus-list">
-        <li><span>Développement web</span><span>Front-end · Back-end</span></li>
-        <li><span>Conception</span><span>UML · Modélisation</span></li>
-        <li><span>Design d’interface</span><span>Figma · Prototypage</span></li>
-        <li><span>Organisation</span><span>Agile · GANTT · Git</span></li>
-      </ul>
+      </a>
+      <a class="project-card" href="index.php?matiere=M202" aria-label="Voir les travaux de gestion de projet et outils collaboratifs">
+        <div class="project-mark"><span>02 / Gestion de projet</span><span aria-hidden="true">↗</span></div>
+        <h3>Organisation & outils</h3>
+        <p>Travaux pratiques autour de Git, de la gestion de projet Agile et des diagrammes GANTT.</p>
+      </a>
     </div>
   </section>
 
@@ -558,6 +550,6 @@ $matieres = listMatieres();
 <?php endif; ?>
 </main>
 
-<footer>Portfolio scolaire</footer>
+<footer>Mohamed Tarchouli · Développement web full stack</footer>
 </body>
 </html>
