@@ -48,8 +48,8 @@ $projects = [
     ],
     [
         'title' => 'Facilo',
-        'desc'  => "Une plateforme de petites annonces, dans l'esprit d'Avito.",
-        'url'   => '',
+        'desc'  => "Une plateforme de quick annonces, dans l'esprit d'Avito.",
+        'url'   => 'https://facilo-project-team-aim.vercel.app/',
     ],
 ];
 
@@ -58,7 +58,7 @@ $skills = [
     ['title' => 'Front-end',              'icon' => 'monitor',   'items' => ['HTML', 'CSS', 'JavaScript', 'Bootstrap', 'Figma']],
     ['title' => 'Back-end',               'icon' => 'server',    'items' => ['PHP', 'Python', 'SQL', 'MySQL']],
     ['title' => 'Analyse et conception',  'icon' => 'layers',    'items' => ['Merise', 'UML']],
-    ['title' => 'Bureautique et design',  'icon' => 'file-text', 'items' => ['Excel', 'PowerPoint', 'Word', 'Canva']],
+    ['title' => 'Bureautique',            'icon' => 'file-text', 'items' => ['Excel', 'PowerPoint', 'Word', 'Canva']],
     ['title' => 'Outils',                 'icon' => 'tool',      'items' => ['Git et GitHub', 'GitLab', 'Vercel', 'Jira', 'GanttProject', 'StarUML']],
 ];
 
@@ -388,8 +388,8 @@ $pageTitle = $currentDir !== null
   .about .text p:last-child{margin-bottom:0;}
 
   /* Compétences */
-  .skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
-  .skill-group{border:1.5px solid var(--black);padding:28px;}
+  .skills{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;}
+  .skill-group{flex:0 1 calc((100% - 40px) / 3);min-width:280px;border:1.5px solid var(--black);padding:28px;}
   .skill-group h3{display:flex;align-items:center;gap:12px;font-size:1.5rem;}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}
   .chip{border:1px solid currentColor;border-radius:999px;padding:4px 14px;font-size:.92rem;}
