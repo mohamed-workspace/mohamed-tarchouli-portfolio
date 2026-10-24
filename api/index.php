@@ -38,8 +38,8 @@ define('SUBFOLDER_ORDER', ['uml', 'figma']);
 $projects = [
     [
         'title' => 'Hours',
-        'desc'  => "Page d'accueil e-commerce pour une marque de vêtements, réalisée en HTML et CSS pour un client freelance.",
-        'url'   => 'https://levimohamed.github.io/frount-end',
+        'desc'  => "Landing page d'un e-commerce pour une marque de vêtements, réalisée en HTML, CSS et JavaScript pour un client freelance.",
+        'url'   => 'https://levimohamed.github.io/front-end/',
     ],
     [
         'title' => 'Ce portfolio',
@@ -50,6 +50,15 @@ $projects = [
         'title' => 'Facilo',
         'desc'  => "Une plateforme de quick annonces, dans l'esprit d'Avito.",
         'url'   => 'https://facilo-project-team-aim.vercel.app/',
+    ],
+];
+
+// CERTIFICATS : pour en ajouter un, copiez une ligne et changez les valeurs.
+$certificates = [
+    [
+        'title'  => 'Python Essentials',
+        'issuer' => 'Délivré par Cisco',
+        'url'    => 'https://www.credly.com/badges/aebb6a10-3013-4a90-9cd5-0aefd840399f/linked_in_profile',
     ],
 ];
 
@@ -68,6 +77,7 @@ $nav = [
     ['apropos',     'À propos',    'user'],
     ['competences', 'Compétences', 'code'],
     ['projets',     'Projets',     'folder'],
+    ['certificats', 'Certificats', 'award'],
     ['modules',     'Modules',     'book'],
     ['contact',     'Contact',     'mail'],
 ];
@@ -516,6 +526,8 @@ $pageTitle = $currentDir !== null
   <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
   <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
   <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></symbol>
+  <symbol id="i-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
   <symbol id="i-layers" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
   <symbol id="i-file-text" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
   <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
@@ -614,8 +626,28 @@ $pageTitle = $currentDir !== null
     </div>
   </section>
 
+  <!-- ======================= CERTIFICATS ======================= -->
+  <section class="section alt" id="certificats">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Certificats</h2>
+      </div>
+      <div class="projects">
+        <?php foreach ($certificates as $c): ?>
+          <a class="project" href="<?= htmlspecialchars($c['url']) ?>" target="_blank" rel="noopener">
+            <h3>
+              <span><?= htmlspecialchars($c['title']) ?></span>
+              <?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?>
+            </h3>
+            <p><?= htmlspecialchars($c['issuer']) ?></p>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </section>
+
   <!-- ======================= MODULES ======================= -->
-  <section class="section alt" id="modules">
+  <section class="section" id="modules">
     <div class="wrap">
       <div class="section-head">
         <h2>Modules</h2>
@@ -646,6 +678,7 @@ $pageTitle = $currentDir !== null
       </div>
       <ul class="contact-list">
         <li><a href="mailto:mohamed.tarchouli.contact@gmail.com"><?= ic('mail') ?><span class="label">Email</span><span class="value">mohamed.tarchouli.contact@gmail.com</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
+        <li><a href="tel:0600000000"><?= ic('phone') ?><span class="label">Téléphone</span><span class="value">06 00 00 00 00</span></a></li>
         <li><a href="https://github.com/mohamed-workspace" target="_blank" rel="noopener"><?= ic('github') ?><span class="label">GitHub</span><span class="value">mohamed-workspace</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
         <li><a href="https://linkedin.com/in/mohamed-tarchouli-691583403?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" rel="noopener"><?= ic('linkedin') ?><span class="label">LinkedIn</span><span class="value">Mohamed Tarchouli</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
       </ul>
