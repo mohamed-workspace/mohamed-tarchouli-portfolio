@@ -326,6 +326,25 @@ $pageTitle = $currentDir !== null
   }
   .links a:hover{color:var(--white);background:rgba(255,255,255,.12);}
 
+  /* Bouton hamburger (3 lignes) : visible seulement sur petits écrans */
+  .menu-toggle{
+    display:none;position:relative;width:44px;height:44px;padding:0;
+    border:1px solid rgba(255,255,255,.3);border-radius:10px;
+    background:transparent;color:var(--white);cursor:pointer;
+    transition:background .2s,border-color .2s;
+  }
+  .menu-toggle:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.6);}
+  .menu-toggle span{
+    position:absolute;left:11px;right:11px;height:2px;border-radius:2px;background:currentColor;
+    transition:top .3s ease,transform .3s ease,opacity .2s ease;
+  }
+  .menu-toggle span:nth-child(1){top:14px;}
+  .menu-toggle span:nth-child(2){top:21px;}
+  .menu-toggle span:nth-child(3){top:28px;}
+  .topbar.open .menu-toggle span:nth-child(1){top:21px;transform:rotate(45deg);}
+  .topbar.open .menu-toggle span:nth-child(2){opacity:0;}
+  .topbar.open .menu-toggle span:nth-child(3){top:21px;transform:rotate(-45deg);}
+
   /* ---------- Hero (fond noir + grille animée) ---------- */
   .hero{position:relative;overflow:hidden;background:var(--black);color:var(--white);isolation:isolate;}
   .hero::before{
@@ -487,14 +506,35 @@ $pageTitle = $currentDir !== null
     .section{padding:72px 0;}
     .about{grid-template-columns:1fr;gap:24px;}
   }
-  @media (max-width:700px){
-    .links{gap:0;}
-    .links a{padding:10px;}
-    .links a .lbl{display:none;}
-    .brand{font-size:1.05rem;}
+  @media (max-width:960px){
+    .menu-toggle{display:block;}
+    .brand{font-size:1.1rem;}
+    /* Panneau du menu : glisse et apparaît, puis les liens entrent un par un */
+    .links{
+      position:absolute;top:100%;left:0;right:0;
+      flex-direction:column;gap:0;
+      padding:8px 28px 24px;
+      background:rgba(0,0,0,.97);border-bottom:1px solid rgba(255,255,255,.14);
+      max-height:calc(100vh - 62px);overflow-y:auto;
+      opacity:0;visibility:hidden;transform:translateY(-14px);
+      transition:opacity .3s ease,transform .3s ease,visibility 0s linear .3s;
+    }
+    .topbar.open .links{
+      opacity:1;visibility:visible;transform:none;
+      transition:opacity .3s ease,transform .3s ease,visibility 0s;
+    }
+    .links a{
+      padding:16px 4px;border-radius:0;font-size:1.1rem;color:var(--white);
+      border-bottom:1px solid rgba(255,255,255,.12);
+      opacity:0;transform:translateY(-8px);
+      transition:opacity .35s ease,transform .35s ease,background .2s;
+    }
+    .links a:last-child{border-bottom:0;}
+    .topbar.open .links a{opacity:1;transform:none;transition-delay:calc(var(--i) * 55ms + 80ms);}
   }
   @media (max-width:480px){
     .wrap,.topbar .bar,main.page{padding-left:18px;padding-right:18px;}
+    .links{padding-left:18px;padding-right:18px;}
     .hero-inner,.hero.mini .hero-inner{padding-left:18px;padding-right:18px;}
     .contact-list a{gap:12px;}
     .contact-list .label{display:none;}
@@ -505,6 +545,7 @@ $pageTitle = $currentDir !== null
     html{scroll-behavior:auto;}
     .hero::before,.hero::after{animation:none;}
     .rise{animation:none;opacity:1;transform:none;}
+    .links,.links a,.menu-toggle span{transition:none !important;}
   }
 </style>
 </head>
@@ -536,9 +577,12 @@ $pageTitle = $currentDir !== null
 <nav class="topbar" aria-label="Navigation principale">
   <div class="bar">
     <a class="brand" href="index.php#accueil">Mohamed Tarchouli</a>
-    <div class="links">
-      <?php foreach ($nav as $n): ?>
-        <a href="index.php#<?= $n[0] ?>" aria-label="<?= htmlspecialchars($n[1]) ?>"><?= ic($n[2]) ?><span class="lbl"><?= htmlspecialchars($n[1]) ?></span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="links" id="menu">
+      <?php foreach ($nav as $i => $n): ?>
+        <a href="index.php#<?= $n[0] ?>" style="--i:<?= $i ?>"><?= ic($n[2]) ?><span class="lbl"><?= htmlspecialchars($n[1]) ?></span></a>
       <?php endforeach; ?>
     </div>
   </div>
@@ -678,7 +722,7 @@ $pageTitle = $currentDir !== null
       </div>
       <ul class="contact-list">
         <li><a href="mailto:mohamed.tarchouli.contact@gmail.com"><?= ic('mail') ?><span class="label">Email</span><span class="value">mohamed.tarchouli.contact@gmail.com</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
-        <li><a href="tel:0636211910"><?= ic('phone') ?><span class="label">Téléphone</span><span class="value">06 36 21 19 10</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
+        <li><a href="tel:0600000000"><?= ic('phone') ?><span class="label">Téléphone</span><span class="value">06 00 00 00 00</span></a></li>
         <li><a href="https://github.com/mohamed-workspace" target="_blank" rel="noopener"><?= ic('github') ?><span class="label">GitHub</span><span class="value">mohamed-workspace</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
         <li><a href="https://linkedin.com/in/mohamed-tarchouli-691583403?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" rel="noopener"><?= ic('linkedin') ?><span class="label">LinkedIn</span><span class="value">Mohamed Tarchouli</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
       </ul>
@@ -764,6 +808,37 @@ $pageTitle = $currentDir !== null
     <a href="#top"><?= ic('arrow-up') ?>Haut de page</a>
   </div>
 </footer>
+
+<script>
+// Menu mobile : ouvre / ferme le panneau
+(function () {
+  var bar = document.querySelector('.topbar');
+  var btn = document.querySelector('.menu-toggle');
+  if (!bar || !btn) return;
+
+  function setOpen(open) {
+    bar.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+  }
+
+  btn.addEventListener('click', function () {
+    setOpen(!bar.classList.contains('open'));
+  });
+  bar.querySelectorAll('.links a').forEach(function (a) {
+    a.addEventListener('click', function () { setOpen(false); });
+  });
+  document.addEventListener('click', function (e) {
+    if (!bar.contains(e.target)) setOpen(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setOpen(false);
+  });
+  window.matchMedia('(min-width: 961px)').addEventListener('change', function (e) {
+    if (e.matches) setOpen(false);
+  });
+})();
+</script>
 
 </body>
 </html>
