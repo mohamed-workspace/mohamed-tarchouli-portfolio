@@ -32,6 +32,18 @@ define('SUBFOLDER_ORDER', ['uml', 'figma']);
 // Contenu du portfolio (partie facile à modifier)
 // ----------------------------------------------------------------
 
+// PHRASES DU HERO : écrites puis effacées en boucle, comme un message.
+// La première est aussi le texte affiché si JavaScript est désactivé.
+$heroPhrases = [
+    'Stagiaire en développement web full stack',
+    'Bienvenue sur mon portfolio',
+];
+// La plus longue sert à réserver la hauteur (évite que la page saute).
+$heroLongest = $heroPhrases[0];
+foreach ($heroPhrases as $ph) {
+    if (strlen($ph) > strlen($heroLongest)) $heroLongest = $ph;
+}
+
 // PROJETS : pour en ajouter un, copiez une ligne et changez les valeurs.
 // 'url' peut être un lien externe (https://...) ou une page de votre site.
 // 'url' vide = carte "bientôt" (non cliquable, bordure en pointillés).
@@ -393,7 +405,35 @@ $pageTitle = $currentDir !== null
     font-family:var(--display);font-size:3.4rem;font-weight:700;color:var(--g4);
   }
   .avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.05);transition:filter .5s ease;}
-  .avatar:hover img{filter:none;}
+  .avatar:focus-visible{outline-offset:6px;}
+  .avatar:focus-visible img,.avatar.colored img{filter:none;}
+  @media (hover:hover){.avatar:hover img{filter:none;}}
+  @media (hover:none){.avatar{cursor:pointer;-webkit-tap-highlight-color:transparent;}}
+
+  /* Indice animé sous la photo : survol (PC) ou toucher (téléphone) */
+  .avatar-wrap{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .avatar-hint{
+    display:flex;flex-direction:column;align-items:center;gap:6px;margin:0;
+    color:var(--white);font-size:.98rem;white-space:nowrap;
+    animation:hint-pulse 2.4s ease-in-out infinite;
+  }
+  .avatar-hint .ic{width:1.5em;height:1.5em;animation:nudge 1.3s ease-in-out infinite;}
+  .hint-hover{display:none;}
+  @media (hover:hover){.hint-hover{display:inline;}.hint-tap{display:none;}}
+  @keyframes nudge{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+  @keyframes hint-pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+  /* Ligne qui s'écrit et s'efface */
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  .swap{display:grid;}
+  .swap .sizer,.swap .typed{grid-area:1/1;}
+  .swap .sizer{visibility:hidden;}
+  .typed::after{
+    content:"";display:inline-block;width:2px;height:1em;margin-left:3px;
+    vertical-align:-.12em;background:currentColor;animation:caret 1s steps(1) infinite;
+  }
+  .typed.is-typing::after{animation:none;}
+  @keyframes caret{50%{opacity:0;}}
 
   .hero.mini .hero-inner{min-height:0;padding:64px 28px 56px;}
   .hero.mini h1{font-size:clamp(2.6rem,7vw,5rem);}
@@ -546,6 +586,8 @@ $pageTitle = $currentDir !== null
     .hero::before,.hero::after{animation:none;}
     .rise{animation:none;opacity:1;transform:none;}
     .links,.links a,.menu-toggle span{transition:none !important;}
+    .avatar-hint,.avatar-hint .ic,.typed::after{animation:none;}
+    .avatar-hint{opacity:1;}
   }
 </style>
 </head>
@@ -595,16 +637,29 @@ $pageTitle = $currentDir !== null
   <div class="hero-inner">
     <div class="intro">
       <h1 class="rise" style="--d:.05s">Mohamed<br>Tarchouli</h1>
-      <p class="role rise" style="--d:.25s">Stagiaire en développement web full stack</p>
+      <p class="role rise" style="--d:.25s">
+        <span class="sr-only"><?= htmlspecialchars($heroPhrases[0]) ?></span>
+        <span class="swap" aria-hidden="true">
+          <span class="sizer"><?= htmlspecialchars($heroLongest) ?></span>
+          <span class="typed" id="typed" data-phrases="<?= htmlspecialchars(json_encode($heroPhrases, JSON_UNESCAPED_UNICODE), ENT_QUOTES) ?>"><?= htmlspecialchars($heroPhrases[0]) ?></span>
+        </span>
+      </p>
       <p class="lead rise" style="--d:.4s">Je conçois des interfaces claires et je construis la partie serveur qui va avec. Voici mes projets, mes compétences et les exercices de mes modules.</p>
       <div class="cta rise" style="--d:.55s">
         <a class="btn solid" href="#projets"><?= ic('folder') ?>Voir mes projets</a>
         <a class="btn ghost" href="#contact"><?= ic('mail') ?>Me contacter</a>
       </div>
     </div>
-    <div class="avatar rise" style="--d:.3s">
-      <span aria-hidden="true">MT</span>
-      <img src="/images/profile.png" alt="Photo de Mohamed Tarchouli" onerror="this.remove()">
+    <div class="avatar-wrap rise" style="--d:.3s">
+      <div class="avatar" role="button" tabindex="0" aria-pressed="false" aria-label="Afficher la photo en couleurs">
+        <span aria-hidden="true">MT</span>
+        <img src="/images/profile.png" alt="Photo de Mohamed Tarchouli" onerror="this.remove()">
+      </div>
+      <p class="avatar-hint" aria-hidden="true">
+        <?= ic('arrow-up') ?>
+        <span class="hint-hover">Survolez-moi</span>
+        <span class="hint-tap">Touchez-moi</span>
+      </p>
     </div>
   </div>
 </header>
@@ -810,6 +865,64 @@ $pageTitle = $currentDir !== null
 </footer>
 
 <script>
+// Photo : sur téléphone, un toucher affiche / masque les couleurs
+(function () {
+  var av = document.querySelector('.avatar');
+  if (!av) return;
+  var noHover = window.matchMedia('(hover: none)');
+  function toggle() {
+    if (!noHover.matches) return;
+    var on = av.classList.toggle('colored');
+    av.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  av.addEventListener('click', toggle);
+  av.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
+})();
+
+// Phrase du hero : s'écrit, reste un moment, s'efface, puis la suivante (en boucle)
+(function () {
+  var el = document.getElementById('typed');
+  if (!el) return;
+  var phrases;
+  try { phrases = JSON.parse(el.getAttribute('data-phrases')); } catch (e) { return; }
+  if (!phrases || phrases.length < 2) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var idx = 0, pos = phrases[0].length, deleting = false;
+
+  function tick() {
+    var full = phrases[idx], delay;
+    if (!deleting) {
+      if (pos < full.length) {
+        pos++;
+        el.textContent = full.slice(0, pos);
+        el.classList.add('is-typing');
+        delay = 55 + Math.random() * 60;
+      } else {
+        el.classList.remove('is-typing');
+        deleting = true;
+        delay = 2300;
+      }
+    } else {
+      if (pos > 0) {
+        pos--;
+        el.textContent = full.slice(0, pos);
+        el.classList.add('is-typing');
+        delay = 28 + Math.random() * 25;
+      } else {
+        el.classList.remove('is-typing');
+        deleting = false;
+        idx = (idx + 1) % phrases.length;
+        delay = 450;
+      }
+    }
+    setTimeout(tick, delay);
+  }
+  setTimeout(tick, 2600);
+})();
+
 // Menu mobile : ouvre / ferme le panneau
 (function () {
   var bar = document.querySelector('.topbar');
