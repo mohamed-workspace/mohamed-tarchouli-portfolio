@@ -678,7 +678,7 @@ $pageTitle = $currentDir !== null
       </div>
       <ul class="contact-list">
         <li><a href="mailto:mohamed.tarchouli.contact@gmail.com"><?= ic('mail') ?><span class="label">Email</span><span class="value">mohamed.tarchouli.contact@gmail.com</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
-        <li><a href="tel:0600000000"><?= ic('phone') ?><span class="label">Téléphone</span><span class="value">06 00 00 00 00</span></a></li>
+        <li><a href="tel:0636211910"><?= ic('phone') ?><span class="label">Téléphone</span><span class="value">06 36 21 19 10</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
         <li><a href="https://github.com/mohamed-workspace" target="_blank" rel="noopener"><?= ic('github') ?><span class="label">GitHub</span><span class="value">mohamed-workspace</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
         <li><a href="https://linkedin.com/in/mohamed-tarchouli-691583403?utm_source=share_via&amp;utm_content=profile&amp;utm_medium=member_android" target="_blank" rel="noopener"><?= ic('linkedin') ?><span class="label">LinkedIn</span><span class="value">Mohamed Tarchouli</span><?= str_replace('class="ic"', 'class="ic go"', ic('arrow-up-right')) ?></a></li>
       </ul>
