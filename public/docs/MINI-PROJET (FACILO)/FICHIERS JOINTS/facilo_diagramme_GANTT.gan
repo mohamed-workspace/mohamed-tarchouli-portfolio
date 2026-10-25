@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2026-09-05" view-index="0" gantt-divider-location="351" resource-divider-location="300" version="3.3.3316" locale="fr_MA">
+    <description/>
+    <view zooming-state="default:3" id="gantt-chart">
+        <field id="tpd3" name="Name" width="200" order="0"/>
+        <field id="tpd4" name="Begin date" width="75" order="1"/>
+        <field id="tpd5" name="End date" width="75" order="2"/>
+        <field id="tpd15" name="Notes" width="20" order="3"/>
+        <option id="filter.completedTasks" value="false"/>
+        <option id="filter.dueTodayTasks" value="false"/>
+        <option id="filter.overdueTasks" value="false"/>
+        <option id="filter.inProgressTodayTasks" value="false"/>
+        <option id="color.recent"><![CDATA[#ff33cc #ff6633 #ccccff #ffff00 #66ffff #9900ff #009900 #00ff99 #33ff99 #ff0033]]></option>
+    </view>
+    <view id="resource-table">
+        <field id="0" name="Name" width="210" order="0"/>
+        <field id="1" name="Default role" width="86" order="1"/>
+    </view>
+    <!-- -->
+    <calendars>
+        <day-types>
+            <day-type id="0"/>
+            <day-type id="1"/>
+            <default-week id="1" name="default" sun="1" mon="0" tue="0" wed="0" thu="0" fri="0" sat="1"/>
+            <only-show-weekends value="false"/>
+            <overriden-day-types/>
+            <days/>
+        </day-types>
+    </calendars>
+    <tasks empty-milestones="true">
+        <taskproperties>
+            <taskproperty id="tpd0" name="type" type="default" valuetype="icon"/>
+            <taskproperty id="tpd1" name="priority" type="default" valuetype="icon"/>
+            <taskproperty id="tpd2" name="info" type="default" valuetype="icon"/>
+            <taskproperty id="tpd3" name="name" type="default" valuetype="text"/>
+            <taskproperty id="tpd4" name="begindate" type="default" valuetype="date"/>
+            <taskproperty id="tpd5" name="enddate" type="default" valuetype="date"/>
+            <taskproperty id="tpd6" name="duration" type="default" valuetype="int"/>
+            <taskproperty id="tpd7" name="completion" type="default" valuetype="int"/>
+            <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
+            <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
+        </taskproperties>
+        <task id="1" uid="d4dfe375492546ad8da81575be5b371b" name="Analyse du projet" color="#0066ff" meeting="false" start="2026-09-07" duration="3" complete="0" expand="true">
+            <depend id="2" type="2" difference="0" hardness="Strong"/>
+            <depend id="3" type="2" difference="0" hardness="Strong"/>
+            <depend id="10" type="2" difference="0" hardness="Strong"/>
+            <depend id="15" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="2" uid="592f7272306c493bb524283b6d9346ab" name="Logo et slogan" color="#ff0033" meeting="false" start="2026-09-10" duration="1" complete="0" expand="true">
+            <depend id="19" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="3" uid="83303d5ccfa3474e9cd594019b03a68e" name="Dictionnaire de données" color="#009900" meeting="false" start="2026-09-10" duration="1" complete="0" expand="true">
+            <depend id="4" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="4" uid="ede785bee0804b48b39bd5d0dbbb562c" name="MCD" color="#009900" meeting="false" start="2026-09-11" duration="2" complete="0" expand="true">
+            <depend id="8" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="8" uid="68a066323ad24811bba90ec7432577ab" name="MLD" color="#009900" meeting="false" start="2026-09-15" duration="1" complete="0" expand="true">
+            <depend id="9" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="9" uid="55f656d7c46f4b35b0b153fa1e9d79c6" name="Création de la base de données" color="#009900" meeting="false" start="2026-09-16" duration="1" complete="0" expand="true">
+            <depend id="22" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="10" uid="8f383e7f68b340089a6cda568d0de11b" name="Diagramme de classes" color="#9900ff" meeting="false" start="2026-09-10" duration="1" complete="0" expand="true">
+            <depend id="11" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="11" uid="aa11e9a61cad48bbb7676b510998aefb" name="Diagramme de cas d'utilisation" color="#9900ff" meeting="false" start="2026-09-11" duration="1" complete="0" expand="true">
+            <depend id="12" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="12" uid="c8f84062ebcb45fda2f7a89042a6132f" name="Diagramme de séquence" color="#9900ff" meeting="false" start="2026-09-14" duration="1" complete="0" expand="true">
+            <depend id="13" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="13" uid="6b2055c55a584117ab313ab623f673fe" name="Diagramme d'activité" color="#9900ff" meeting="false" start="2026-09-15" duration="1" complete="0" expand="true">
+            <depend id="14" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="14" uid="3e137fbefa6d4d308abae5e59ed4a55e" name="Diagramme de transition" color="#9900ff" meeting="false" start="2026-09-16" duration="1" complete="0" expand="true">
+            <depend id="22" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="15" uid="01bdc42a28fb4bc29f4d341fc0b81b85" name="Architecture des pages (figma)" color="#66ffff" meeting="false" start="2026-09-10" duration="1" complete="0" expand="true">
+            <depend id="16" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="16" uid="4912c18835a74371818767a0d16cb28e" name="UI" color="#66ffff" meeting="false" start="2026-09-11" duration="2" complete="0" expand="true">
+            <depend id="17" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="17" uid="a11088f9b72344218b2ba6b4f68afe6e" name="UX" color="#66ffff" meeting="false" start="2026-09-15" duration="1" complete="0" expand="true">
+            <depend id="18" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="18" uid="4e60176a5a154011a9af05e2d8ec65ba" name="structure html" color="#ffff00" meeting="false" start="2026-09-16" duration="2" complete="0" expand="true">
+            <depend id="19" type="2" difference="0" hardness="Strong"/>
+            <depend id="22" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="19" uid="76c211deb8ce4a7691268973f529f214" name="design avec css" color="#ffff00" meeting="false" start="2026-09-18" duration="2" complete="0" expand="true">
+            <depend id="20" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="20" uid="d9f66f79f5464f6e97d7c4e7ef05766b" name="responsive design avec css" color="#ffff00" meeting="false" start="2026-09-22" duration="1" complete="0" expand="true">
+            <depend id="21" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="21" uid="1e2b5760aa0d4a97b23f1f82a36cc077" name="javascript / interactions" color="#ffff00" meeting="false" start="2026-09-23" duration="2" complete="0" expand="true">
+            <depend id="33" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="22" uid="fba1dc2805bc41848db867cefd8fc213" name="php + connexion MySQL" color="#ff33cc" meeting="false" start="2026-09-18" duration="1" complete="0" expand="true">
+            <depend id="23" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="23" uid="995496324a8449d1a80e0f60649932bf" name="Inscription des annonceur" color="#ff33cc" meeting="false" start="2026-09-21" duration="1" complete="0" expand="true">
+            <depend id="24" type="2" difference="0" hardness="Strong"/>
+            <depend id="25" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="24" uid="a77ba32355d343d99b361f195a1d84b9" name="Authentification / déconnexion" color="#ff33cc" meeting="false" start="2026-09-22" duration="1" complete="0" expand="true">
+            <depend id="26" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="25" uid="54dbf79566d94156bd4862ef2d20f1ca" name="Catégories et sous-catégories" color="#ff33cc" meeting="false" start="2026-09-22" duration="1" complete="0" expand="true"/>
+        <task id="26" uid="26bbc56eeb3c4b5cb55c27e4ef9c65ca" name="Dépôt d'une annonce" color="#ff33cc" meeting="false" start="2026-09-23" duration="1" complete="0" expand="true">
+            <depend id="27" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="27" uid="305f3ac775ca4a46a39f8ad874a19cce" name="Upload des photos" color="#ff33cc" meeting="false" start="2026-09-24" duration="1" complete="0" expand="true">
+            <depend id="28" type="2" difference="0" hardness="Strong"/>
+            <depend id="30" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="28" uid="9fbb92b1f3024d76aff5c91fdde25164" name="Consultation + détail des annonces" color="#ff33cc" meeting="false" start="2026-09-25" duration="1" complete="0" expand="true">
+            <depend id="29" type="2" difference="0" hardness="Strong"/>
+            <depend id="31" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="29" uid="7bd7ca43ab6045549bbfbde9c793db2b" name="Recherche multicritères" color="#ff33cc" meeting="false" start="2026-09-28" duration="1" complete="0" expand="true">
+            <depend id="32" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="30" uid="74efe851959b4fad96f172be1ca57b42" name="Modification / suppression" color="#ff33cc" meeting="false" start="2026-09-25" duration="1" complete="0" expand="true">
+            <depend id="32" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="31" uid="e41274033ed5417989b947f617e54bab" name="Durée de vie 1 mois et possibilité d'extention" color="#ff33cc" meeting="false" start="2026-09-28" duration="1" complete="0" expand="true">
+            <depend id="32" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="32" uid="9e9b0ccf2608403390a0b165ae047112" name="Tests de la base de donnée" color="#ff6633" meeting="false" start="2026-09-29" duration="1" complete="0" expand="true">
+            <depend id="33" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="33" uid="886e3d6750324d2c9dbacadc38147e2d" name="Tests  fonctionnels et de recherche" color="#ff6633" meeting="false" start="2026-09-30" duration="1" complete="0" expand="true">
+            <depend id="34" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="34" uid="87580e50228a4970807042fd76582f03" name="Corrections et validation finale" color="#ff6633" meeting="false" start="2026-10-01" duration="1" complete="0" expand="true">
+            <depend id="35" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="35" uid="83e149a22790429a813ca214f5839369" name="Hébergement / mise en ligne" color="#ff6633" meeting="false" start="2026-10-02" duration="1" complete="0" expand="true">
+            <depend id="36" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="36" uid="fb338855043f417fa20c56d0635cca72" name="Documentation technique" color="#ccccff" meeting="false" start="2026-10-05" duration="1" complete="0" expand="true">
+            <depend id="37" type="2" difference="0" hardness="Strong"/>
+        </task>
+        <task id="37" uid="460fc0685ac8461f89c7ee031870df59" name="Préparation de la démonstration" color="#ccccff" meeting="false" start="2026-10-06" duration="1" complete="0" expand="true"/>
+    </tasks>
+    <resources/>
+    <allocations/>
+    <vacations/>
+    <previous/>
+    <roles roleset-name="Default"/>
+</project>
